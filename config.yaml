@@ -1,12 +1,12 @@
-# config.yaml
 app:
   name: App
   version: 1.0.0
   environment: production
-
+  script: server.js
 database:
   host: localhost
-  port: 1360
+  port: 5432
 
 logging:
-  file: logs/app.log
+  error: ./logs/error/error.log
+  outs : ./logs/outs/outs.log
