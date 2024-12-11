@@ -1,0 +1,12 @@
+# config.yaml
+app:
+  name: App
+  version: 1.0.0
+  environment: production
+
+database:
+  host: localhost
+  port: 1360
+
+logging:
+  file: logs/app.log
