@@ -5,20 +5,32 @@ import fastifyPlugin from 'fastify-plugin';
 import pino from 'pino';
 
 const logsPlugin: FastifyPluginAsync = async (fastify) => {
-    const logDir = path.join(__dirname, '../logs');
-    const logFilePath = path.join(logDir, 'server.log');
+    const logDir  = path.join(__dirname, '../logs');
+    const outsDir = path.join(logDir, 'outs');
+    const errorDir= path.join(logDir, 'error');
     try {
         await fsPromises.mkdir(logDir, { recursive: true });
         console.log('Log directory created:', logDir);
+        // 创建 outs 目录
+        await fsPromises.mkdir(outsDir, { recursive: true });
+        console.log('Outs directory created:', outsDir);
+        // 创建 error 目录
+        await fsPromises.mkdir(errorDir, { recursive: true });
+        console.log('Error directory created:', errorDir);
     } catch (err) {
         console.error('Error creating log directory:', err);
     }
-    const isProduction = process.env.NODE_ENV === 'production';
-    const logger = pino(
-        isProduction
-            ? pino.destination(logFilePath)
-            : { level: 'info', transport: { target: 'pino-pretty', options: { colorize: true } } }
-    );
+    const logger = pino({
+        level: 'info',
+        transport: {
+            target: 'pino-pretty',
+            options: {
+                colorize: true,
+                translateTime: 'SYS:standard',
+                ignore: 'pid,hostname'
+            }
+        }
+    });
     const formatDate = (date: Date): string => {
         const pad = (num: number) => (num < 10 ? '0' + num : num);
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
@@ -26,7 +38,7 @@ const logsPlugin: FastifyPluginAsync = async (fastify) => {
     fastify.addHook('onRequest', async (request, reply) => {
         (request as any).startTime = process.hrtime();
         const now = new Date();
-        const beijingTime = new Date(now.getTime() + 8 * 60 * 60 * 1000); // UTC +8
+        const beijingTime = new Date(now.getTime()); // UTC +8
         (request as any).requestTime = formatDate(beijingTime); // 记录请求时间
     });
     fastify.addHook('onResponse', async (request, reply) => {
