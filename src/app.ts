@@ -28,7 +28,7 @@ const startApp = () => {
         }, async (err) => {
             if (err) throw err;
             const logRotateProcessId:any = await getProcessId(app.name);
-            console.log(`${app.name}_${logRotateProcessId}应用已通过 PM2 启动`);
+            console.log(`${app.name}_${logRotateProcessId}_${app.version}应用已成功启动！`);
             pm2.disconnect();
         });
     });

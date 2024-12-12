@@ -6,7 +6,6 @@ app:
 database:
   host: localhost
   port: 5432
-
 logging:
-  error: ./logs/error/error.log
-  outs : ./logs/outs/outs.log
+  error: logs/error/error.log
+  outs : logs/outs/outs.log

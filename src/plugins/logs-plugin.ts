@@ -1,25 +1,8 @@
 import { FastifyPluginAsync } from 'fastify';
-import fsPromises from 'fs/promises'; // 使用 fs/promises 以支持 Promise
-import path from 'path';
 import fastifyPlugin from 'fastify-plugin';
 import pino from 'pino';
 
 const logsPlugin: FastifyPluginAsync = async (fastify) => {
-    const logDir  = path.join(__dirname, '../logs');
-    const outsDir = path.join(logDir, 'outs');
-    const errorDir= path.join(logDir, 'error');
-    try {
-        await fsPromises.mkdir(logDir, { recursive: true });
-        console.log('Log directory created:', logDir);
-        // 创建 outs 目录
-        await fsPromises.mkdir(outsDir, { recursive: true });
-        console.log('Outs directory created:', outsDir);
-        // 创建 error 目录
-        await fsPromises.mkdir(errorDir, { recursive: true });
-        console.log('Error directory created:', errorDir);
-    } catch (err) {
-        console.error('Error creating log directory:', err);
-    }
     const logger = pino({
         level: 'info',
         transport: {
