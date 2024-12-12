@@ -1,1 +1,2 @@
 # fastify-startkit
+基于fastify和ts的搭建的快速开发的脚手架

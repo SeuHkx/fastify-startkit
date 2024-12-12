@@ -1,8 +1,9 @@
 {
 	"scripts": {
+		"copy:config": "cpx 'src/config/**/*' dist/config/",
 		"dev:ts": "concurrently \"cross-env NODE_ENV=development tsc -w\"  \"ts-node-dev src/server.ts | pino-pretty --colorize\"",
-		"dev:js": "concurrently \"tsc -w\" \"cross-env NODE_ENV=development tsc -p tsconfig.json && nodemon dist/server.js\"",
-		"build:ts": "tsc -p tsconfig.json",
+		"dev:js": "concurrently \"tsc -w\" \"cross-env NODE_ENV=development pnpm build:ts && nodemon dist/server.js\"",
+		"build:ts": "tsc -p tsconfig.json && pnpm copy:config",
 		"webpack": "concurrently \"cross-env NODE_ENV=production pnpm build:ts\" \"webpack --config webpack.config.ts\""
 	},
 	"dependencies": {
@@ -28,6 +29,7 @@
 		"clean-webpack-plugin": "^4.0.0",
 		"concurrently": "^9.1.0",
 		"copy-webpack-plugin": "^12.0.2",
+		"cpx": "^1.5.0",
 		"cross-env": "^7.0.3",
 		"javascript-obfuscator": "^4.1.1",
 		"nodemon": "^3.1.7",

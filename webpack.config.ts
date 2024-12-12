@@ -42,9 +42,9 @@ const config: Configuration = {
             patterns: [
                 { from: 'package.json', to: '../' },
                 { from: 'pnpm-lock.yaml', to: '../' },
-                { from: 'config.yaml', to: '../' },
                 { from: '.env', to: '../' },
-                { from: './dist/app.js', to: '' }
+                { from: './dist/app.js', to: '' },
+                { from: './dist/config', to: './config' }
             ]
         })
     ],
