@@ -1,11 +1,9 @@
 {
 	"scripts": {
-		"dev:ts": "ts-node-dev src/server.ts | pino-pretty --colorize",
-		"watch": "tsc -w",
-		"build": "tsc -p tsconfig.json",
-		"start:js": "node dist/server.js",
-		"start:dev": "tsc -w & nodemon dist/server.js",
-		"webpack": "webpack --config webpack.config.ts"
+		"dev:ts": "concurrently \"cross-env NODE_ENV=development tsc -w\"  \"ts-node-dev src/server.ts | pino-pretty --colorize\"",
+		"dev:js": "concurrently \"tsc -w\" \"cross-env NODE_ENV=development tsc -p tsconfig.json && nodemon dist/server.js\"",
+		"build:ts": "tsc -p tsconfig.json",
+		"webpack": "concurrently \"cross-env NODE_ENV=production pnpm build:ts\" \"webpack --config webpack.config.ts\""
 	},
 	"dependencies": {
 		"@fastify/cors": "^10.0.1",
@@ -28,14 +26,15 @@
 		"@types/webpack-node-externals": "^3.0.4",
 		"babel-loader": "^9.2.1",
 		"clean-webpack-plugin": "^4.0.0",
+		"concurrently": "^9.1.0",
 		"copy-webpack-plugin": "^12.0.2",
+		"cross-env": "^7.0.3",
 		"javascript-obfuscator": "^4.1.1",
 		"nodemon": "^3.1.7",
 		"pino-pretty": "^13.0.0",
 		"pm2": "^5.4.3",
 		"ts-node": "^10.9.2",
 		"ts-node-dev": "^2.0.0",
-		"tsx": "^4.19.2",
 		"typescript": "^5.7.2",
 		"webpack": "^5.97.1",
 		"webpack-cli": "^5.1.4",
