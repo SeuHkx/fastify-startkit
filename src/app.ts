@@ -1,7 +1,7 @@
 import pm2 from 'pm2';
 import yaml from 'js-yaml';
 import fs from 'fs';
-
+import config from 'config';
 const loadYamlConfig = (filePath: string) => {
     try {
         const fileContents = fs.readFileSync(filePath, 'utf8');
@@ -11,8 +11,9 @@ const loadYamlConfig = (filePath: string) => {
         return null;
     }
 };
-const config:any = loadYamlConfig('./../config.yaml');
-const { app ,logging} = config;
+//const config:any = loadYamlConfig('./../config.yaml');
+const app:any = config.get('app');
+const logging:any = config.get('logging');
 
 const startApp = () => {
     pm2.connect((err) => {

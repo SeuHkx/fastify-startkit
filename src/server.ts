@@ -1,6 +1,7 @@
 import Fastify, { FastifyInstance } from 'fastify'
 import dotenv from 'dotenv';
 import routes from './routes';
+import {get} from "./config/config";
 
 dotenv.config();
 const port = Number(process.env.PORT) || 3000;
@@ -10,7 +11,7 @@ const app:FastifyInstance = Fastify({
         }
     }
 });
-
+console.log(get('db'));
 app.register(import('@fastify/formbody'))
 app.register(import('@fastify/multipart'))
 app.register(import('@fastify/cors'), {

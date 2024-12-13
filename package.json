@@ -1,7 +1,7 @@
 {
 	"scripts": {
-		"copy:config": "cpx 'src/config/**/*' dist/config/",
-		"dev:ts": "concurrently \"cross-env NODE_ENV=development tsc -w\"  \"ts-node-dev src/server.ts | pino-pretty --colorize\"",
+		"copy:config": "cpx 'src/config/**/*.yaml' dist/config/",
+		"dev:ts": "concurrently \"cross-env NODE_ENV=development pnpm build:ts\" \"tsc -w\" \"ts-node-dev src/server.ts | pino-pretty --colorize\"",
 		"dev:js": "concurrently \"tsc -w\" \"cross-env NODE_ENV=development pnpm build:ts && nodemon dist/server.js\"",
 		"build:ts": "tsc -p tsconfig.json && pnpm copy:config",
 		"webpack": "concurrently \"cross-env NODE_ENV=production pnpm build:ts\" \"webpack --config webpack.config.ts\""
@@ -11,6 +11,7 @@
 		"@fastify/formbody": "^8.0.1",
 		"@fastify/multipart": "^9.0.1",
 		"@fastify/one-line-logger": "^2.0.1",
+		"config": "^3.3.12",
 		"dotenv": "^16.4.5",
 		"fastify": "^5.1.0",
 		"fastify-plugin": "^5.0.1",
@@ -20,6 +21,7 @@
 	"devDependencies": {
 		"@babel/core": "^7.26.0",
 		"@babel/preset-env": "^7.26.0",
+		"@types/config": "^3.3.5",
 		"@types/js-yaml": "^4.0.9",
 		"@types/node": "^22.10.1",
 		"@types/nodemon": "^1.19.6",
