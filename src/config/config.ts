@@ -4,7 +4,7 @@ import config from 'config';
 
 export function get(key: string) {
     if (!has(key)) {
-        console.warn(`指定 key: ${key} 未配置环境变量`)
+        console.warn(`This is key: ${key} environment variables not configured`)
         return null
     }
     return config.get(key)

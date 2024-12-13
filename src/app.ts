@@ -1,19 +1,7 @@
 import pm2 from 'pm2';
-import yaml from 'js-yaml';
-import fs from 'fs';
-import config from 'config';
-const loadYamlConfig = (filePath: string) => {
-    try {
-        const fileContents = fs.readFileSync(filePath, 'utf8');
-        return yaml.load(fileContents);
-    } catch (e) {
-        console.error('Error reading YAML config:', e);
-        return null;
-    }
-};
-//const config:any = loadYamlConfig('./../config.yaml');
-const app:any = config.get('app');
-const logging:any = config.get('logging');
+import {get} from "./config/config";
+const app:any = get('app');
+const logging:any = get('logging');
 
 const startApp = () => {
     pm2.connect((err) => {
@@ -23,7 +11,7 @@ const startApp = () => {
         }
         pm2.start({
             script: app.script,
-            name: app.name,
+            name:   app.name,
             output: logging.outs,
             error : logging.error,
         }, async (err) => {

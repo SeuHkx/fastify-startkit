@@ -1,0 +1,9 @@
+app:
+  name: App
+  version: 1.0.0
+  script: server.js
+logging:
+  error: logs/error/error.log
+  outs : logs/outs/outs.log
+redis:
+  port: 6379

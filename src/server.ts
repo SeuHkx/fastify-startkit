@@ -11,7 +11,6 @@ const app:FastifyInstance = Fastify({
         }
     }
 });
-console.log(get('db'));
 app.register(import('@fastify/formbody'))
 app.register(import('@fastify/multipart'))
 app.register(import('@fastify/cors'), {
