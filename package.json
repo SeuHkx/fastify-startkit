@@ -1,10 +1,10 @@
 {
 	"scripts": {
 		"copy:config": "cpx 'src/config/**/*.yaml' dist/config/",
-		"dev:ts": "concurrently \"cross-env NODE_ENV=development pnpm build:ts\" \"tsc -w\" \"ts-node-dev src/server.ts | pino-pretty --colorize\"",
-		"dev:js": "concurrently \"tsc -w\" \"cross-env NODE_ENV=development pnpm build:ts && nodemon dist/server.js\"",
+		"dev:ts": "cross-env NODE_ENV=development concurrently \" pnpm build:ts\" \"tsc -w\" \"ts-node-dev src/server.ts | pino-pretty --colorize\"",
+		"dev:js": "cross-env NODE_ENV=development concurrently \"tsc -w\" \" pnpm build:ts && nodemon dist/server.js\"",
 		"build:ts": "tsc -p tsconfig.json && pnpm copy:config",
-		"webpack": "concurrently \"cross-env NODE_ENV=production pnpm build:ts\" \"webpack --config webpack.config.ts\""
+		"webpack": "cross-env NODE_ENV=production concurrently \"pnpm build:ts\" \"webpack --config webpack.config.ts\""
 	},
 	"dependencies": {
 		"@fastify/cors": "^10.0.1",
