@@ -1,8 +1,15 @@
 import pm2 from 'pm2';
-import {get} from "./config/config";
-const app:any = get('app');
-const logging:any = get('logging');
-
+import dotenv from "dotenv";
+dotenv.config({
+    path: './../.env.production'
+});
+const app:any = {
+    name  :  process.env.APP_NAME,
+    script:  process.env.APP_SCRIPT,
+    outs:    process.env.APP_LOGGING_OUTS,
+    error:   process.env.APP_LOGGING_ERROR,
+    version: process.env.APP_VERSION,
+}
 const startApp = () => {
     pm2.connect((err) => {
         if (err) {
@@ -12,8 +19,8 @@ const startApp = () => {
         pm2.start({
             script: app.script,
             name:   app.name,
-            output: logging.outs,
-            error : logging.error,
+            output: app.outs,
+            error : app.error,
         }, async (err) => {
             if (err) throw err;
             const logRotateProcessId:any = await getProcessId(app.name);

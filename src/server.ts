@@ -1,14 +1,14 @@
 import Fastify, { FastifyInstance } from 'fastify'
-const app:any = Fastify({
+const app:FastifyInstance = Fastify({
     logger: {
         transport: {target: '@fastify/one-line-logger',
         }
     }
 });
 (async ()=>{
-    app.register(import('@fastify/formbody'))
-    app.register(import('@fastify/multipart'))
-    app.register(import('@fastify/cors'), {
+    await app.register(import('@fastify/formbody'))
+    await app.register(import('@fastify/multipart'))
+    await app.register(import('@fastify/cors'), {
         origin: '*',
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         allowedHeaders: ['Content-Type', 'Authorization'],
