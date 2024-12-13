@@ -1,8 +1,8 @@
-import { FastifyPluginAsync } from 'fastify';
+import {FastifyPluginAsync, FastifyPluginOptions} from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import pino from 'pino';
 
-const logsPlugin: FastifyPluginAsync = async (fastify) => {
+const logsPlugin: FastifyPluginAsync<FastifyPluginOptions> = async (fastify) => {
     const logger = pino({
         level: 'info',
         transport: {

@@ -1,5 +1,6 @@
 database:
   host: example.com
   port: 3306
+  password: 123456
 redis:
   port: 16379

@@ -1,6 +1,7 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
+import {FastifyRequest, FastifyReply} from 'fastify';
 
 export async function uploadController(req: FastifyRequest, reply: FastifyReply) {
-    const file = await req.file();
-    reply.send({ message: 'File uploaded successfully.' });
+    const fastify:any =  req.server;
+    const database = fastify.config.get('database')
+    reply.send({ message: 'uploaded successfully.' ,config:JSON.stringify(database),env:JSON.stringify(fastify.env.NODE_ENV) });
 }

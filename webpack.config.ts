@@ -42,7 +42,8 @@ const config: Configuration = {
             patterns: [
                 { from: 'package.json', to: '../' },
                 { from: 'pnpm-lock.yaml', to: '../' },
-                { from: '.env', to: '../' },
+                { from: '.env.development', to: '../' },
+                { from: '.env.production', to: '../' },
                 { from: './dist/app.js', to: '' },
                 { from: './dist/config', to: './config' }
             ]
