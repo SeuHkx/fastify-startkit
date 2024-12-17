@@ -16,6 +16,7 @@ const app:FastifyInstance = Fastify({
     await app.register(import('./plugins/logs-plugin'));
     await app.register(import('./plugins/env-plugin'));
     await app.register(import('./plugins/config-plugin'));
+
     const port = Number(app.env?.PORT) || 3000;
     const start = async () => {
         try {
