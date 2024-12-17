@@ -8,6 +8,7 @@ declare module 'fastify' {
         env: { [key: string]: string | undefined };
     }
 }
+
 const envPlugin: FastifyPluginAsync<FastifyPluginOptions> = async (fastify)=>{
     const environment:any = process.env.NODE_ENV;
     const myEnv = dotenv.config({
