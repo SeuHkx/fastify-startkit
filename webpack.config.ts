@@ -45,7 +45,8 @@ const config: Configuration = {
                 { from: '.env.development', to: '../' },
                 { from: '.env.production', to: '../' },
                 { from: './dist/app.js', to: '' },
-                { from: './dist/config', to: './config' }
+                { from: './dist/config', to: './config' },
+                { from: './prisma', to: '../prisma' },
             ]
         })
     ],

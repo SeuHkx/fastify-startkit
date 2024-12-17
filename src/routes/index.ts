@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from 'fastify';
-import uploadRoutes from './index-upload';
+import uploadRoutes from '@/routes/index-upload';
 
 const routes: FastifyPluginAsync = async (app) => {
     app.register(uploadRoutes);
