@@ -4,7 +4,7 @@
 		"dev:ts": "cross-env NODE_ENV=development concurrently \" pnpm build:ts\" \"tsc -w\" \"ts-node-dev -r tsconfig-paths/register --transpile-only src/server.ts | pino-pretty --colorize\"",
 		"dev:js": "cross-env NODE_ENV=development concurrently \"tsc -w\" \" pnpm build:ts && nodemon dist/server.js\"",
 		"build:ts": "tsc -p tsconfig.json && tsc-alias && pnpm copy:config",
-		"webpack": "cross-env NODE_ENV=production concurrently \"pnpm build:ts\" \"webpack --config webpack.config.ts\"",
+		"webpack": "cross-env NODE_ENV=production pnpm build:ts && webpack --config webpack.config.ts",
 		"prisma:init": "dotenv -e .env.development pnpm exec prisma init && rm .env",
 		"prisma:dev": "dotenv -e .env.development pnpm exec prisma db pull && dotenv -e .env.development pnpm exec prisma generate",
 		"prisma:deploy": "dotenv -e .env.production pnpm exec prisma db pull && dotenv -e .env.production pnpm exec prisma generate",
