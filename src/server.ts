@@ -6,7 +6,6 @@ const app:FastifyInstance = Fastify({
     }
 });
 (async ()=>{
-
     await app.register(import('@fastify/formbody'))
     await app.register(import('@fastify/multipart'))
     await app.register(import('@fastify/cors'), {

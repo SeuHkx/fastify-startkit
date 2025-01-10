@@ -4,6 +4,7 @@ import nodeExternals from 'webpack-node-externals';
 import WebpackObfuscator from 'webpack-obfuscator';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+
 const config: Configuration = {
     mode: 'production',
     entry: './dist/server.js',

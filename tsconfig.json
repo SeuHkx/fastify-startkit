@@ -4,11 +4,11 @@
     /* Modules */
     "module": "commonjs",
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
 
     "typeRoots": ["node_modules/@types"],
-    "allowSyntheticDefaultImports": true,
-    "declaration": true,
+    "declaration": false,
     "resolveJsonModule": true,
     "importHelpers": true,
 
@@ -18,8 +18,7 @@
     "strict": true,
     "skipLibCheck": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]
     }
