@@ -12,6 +12,13 @@ const logsPlugin: FastifyPluginAsync<FastifyPluginOptions> = async (fastify) => 
                 translateTime: 'SYS:standard',
                 ignore: 'pid,hostname'
             }
+        },
+        formatters: {
+            log(object) {
+                return {
+                    msg: `operation log | method: "${object.method}" | url: "${object.url}" | query: ${JSON.stringify(object.query)} | status: ${object.status} | responseTime: "${object.responseTime}" | requestTime: "${object.requestTime}"`
+                };
+            }
         }
     });
     const formatDate = (date: Date): string => {
@@ -36,7 +43,7 @@ const logsPlugin: FastifyPluginAsync<FastifyPluginOptions> = async (fastify) => 
             status: reply.statusCode,
             responseTime: `${responseTime} ms`,
             requestTime: (request as any).requestTime // 添加请求时间
-        }, 'operation log');
+        });
     });
     fastify.addHook('onClose', async (instance) => {
         logger.info('Server is closing');
