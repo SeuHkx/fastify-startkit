@@ -1,7 +1,8 @@
 import Fastify, { FastifyInstance } from 'fastify'
 const app:FastifyInstance = Fastify({
     logger: {
-        transport: {target: '@fastify/one-line-logger',
+        transport: {
+            target: '@fastify/one-line-logger',
         }
     }
 });
