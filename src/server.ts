@@ -1,4 +1,5 @@
 import Fastify, { FastifyInstance } from 'fastify'
+import path from "path";
 const app:FastifyInstance = Fastify({
     logger: {
         transport: {
@@ -13,6 +14,10 @@ const app:FastifyInstance = Fastify({
         origin: '*',
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         allowedHeaders: ['Content-Type', 'Authorization'],
+    });
+    await app.register(import('@fastify/static'),{
+        root: path.join(__dirname, '../public'),
+        prefix: '/public/'
     });
     await app.register(import('@/plugins/env-plugin'));
     await app.register(import('@/plugins/config-plugin'));
