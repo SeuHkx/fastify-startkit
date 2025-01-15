@@ -24,7 +24,7 @@ const app:FastifyInstance = Fastify({
     await app.register(import('@/plugins/logs-plugin'));
     await app.register(import('@/plugins/prisma-plugin'));
     await app.register(import('@/plugins/auth-plugin'),{
-        secret: 'your-generated-secret-key' ,
+        secret: app.env.JWT_SECRET,
         noAuthRoutes:['/login']
     });
     await app.register(import('@/plugins/errorHandler-plugin'));
