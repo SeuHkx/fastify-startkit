@@ -23,7 +23,11 @@ const app:FastifyInstance = Fastify({
     await app.register(import('@/plugins/config-plugin'));
     await app.register(import('@/plugins/logs-plugin'));
     await app.register(import('@/plugins/prisma-plugin'));
-
+    await app.register(import('@/plugins/auth-plugin'),{
+        secret: 'your-generated-secret-key' ,
+        noAuthRoutes:['/login']
+    });
+    await app.register(import('@/plugins/errorHandler-plugin'));
     const port = Number(app.env?.PORT) || 3000;
     const start = async () => {
         try {

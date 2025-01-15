@@ -16,7 +16,7 @@ const logsPlugin: FastifyPluginAsync<FastifyPluginOptions> = async (fastify) => 
         formatters: {
             log(object) {
                 return {
-                    msg: `operation log | method: "${object.method}" | url: "${object.url}" | query: ${JSON.stringify(object.query)} | status: ${object.status} | responseTime: "${object.responseTime}" | requestTime: "${object.requestTime}"`
+                    msg: `operation log | method: "${object.method}" | url: "${object.url}" | query: ${JSON.stringify(object.query)} | body:${JSON.stringify(object.body)} | status: ${object.status} | responseTime: "${object.responseTime}" | requestTime: "${object.requestTime}"`
                 };
             }
         }
