@@ -19,6 +19,7 @@ const app:FastifyInstance = Fastify({
         root: path.join(__dirname, '../public'),
         prefix: '/public/'
     });
+    await app.register(import('@/plugins/errorHandler-plugin'));
     await app.register(import('@/plugins/env-plugin'));
     await app.register(import('@/plugins/config-plugin'));
     await app.register(import('@/plugins/logs-plugin'));
@@ -27,7 +28,6 @@ const app:FastifyInstance = Fastify({
         secret: app.env.JWT_SECRET,
         noAuthRoutes:['/login']
     });
-    await app.register(import('@/plugins/errorHandler-plugin'));
     const port = Number(app.env?.PORT) || 3000;
     const start = async () => {
         try {
