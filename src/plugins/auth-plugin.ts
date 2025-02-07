@@ -8,7 +8,10 @@ declare module 'fastify' {
 }
 const authPlugin: FastifyPluginAsync<FastifyPluginOptions> = async (fastify:FastifyInstance, options) => {
     fastify.register(import('@fastify/jwt'), {
-        secret: options.secret
+        secret: options.secret,
+        sign: {
+            expiresIn: '3h',
+        },
     });
     fastify.decorate('authenticate', async (request:FastifyRequest, reply:FastifyReply) => {
         try {
@@ -16,7 +19,7 @@ const authPlugin: FastifyPluginAsync<FastifyPluginOptions> = async (fastify:Fast
         } catch (err) {
             return reply.status(401).send({
                 success: false,
-                message: 'Unauthorized',
+                message: '未登录授权',
                 statusCode: 401,
             });
         }
@@ -24,8 +27,12 @@ const authPlugin: FastifyPluginAsync<FastifyPluginOptions> = async (fastify:Fast
     fastify.addHook('onRequest', async (request, reply) => {
         // 检查是否需要跳过验证
         const urlPath = request.url.split('?')[0];
-        if (options.noAuthRoutes && options.noAuthRoutes.includes(urlPath)) {
-            return;
+        if (options.noAuthRoutes) {
+            for (const route of options.noAuthRoutes) {
+                if (urlPath.startsWith(route)) {
+                    return;
+                }
+            }
         }
         await fastify.authenticate(request, reply);
     });

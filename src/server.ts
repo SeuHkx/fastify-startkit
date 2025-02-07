@@ -15,19 +15,20 @@ const app:FastifyInstance = Fastify({
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         allowedHeaders: ['Content-Type', 'Authorization'],
     });
-    await app.register(import('@fastify/static'),{
-        root: path.join(__dirname, '../public'),
-        prefix: '/public/'
-    });
     await app.register(import('@/plugins/errorHandler-plugin'));
     await app.register(import('@/plugins/env-plugin'));
     await app.register(import('@/plugins/config-plugin'));
     await app.register(import('@/plugins/logs-plugin'));
     await app.register(import('@/plugins/prisma-plugin'));
+    await app.register(import('@fastify/static'),{
+        root: path.join(__dirname, '../public'),
+        prefix: '/public/'
+    });
     await app.register(import('@/plugins/auth-plugin'),{
         secret: app.env.JWT_SECRET,
         noAuthRoutes:['/login']
     });
+
     const port = Number(app.env?.PORT) || 3000;
     const start = async () => {
         try {

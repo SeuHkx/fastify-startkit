@@ -1,18 +1,18 @@
 import {FastifyRequest, FastifyReply,FastifyInstance} from 'fastify';
-
+import serviceLogin from "@/services/service-login";
 export async function controllerLogin(req: FastifyRequest, reply: FastifyReply) {
     try {
         const fastify:FastifyInstance =  req.server;
-        const { username, password } = req.body as { username: string; password: string };
-        if (username === 'admin' && password === 'admin') {
-            const token = fastify.jwt.sign({ username });
-            return reply.send({ token });
+        const user:any = await serviceLogin(fastify,req.body as { name: string; password: string });
+        const resData:any = {
+            success:user.success,
+            statusCode:user.statusCode,
+            message:user.message
         }
-        return reply.status(401).send({
-            message: 'Invalid username or password' ,
-            success: false,
-            statusCode: 401
-        });
+        if(user.success){
+            resData.token = user.data.token;
+        }
+        reply.status(200).send(resData);
     }catch (error) {
         reply.send(error);
     }
