@@ -8,7 +8,13 @@
 		"prisma:init": "dotenv -e .env.development pnpm exec prisma init && rimraf .env",
 		"prisma:dev": "dotenv -e .env.development pnpm exec prisma db pull && dotenv -e .env.development pnpm exec prisma generate",
 		"prisma:deploy": "dotenv -e .env.production pnpm exec prisma db pull && dotenv -e .env.production pnpm exec prisma generate",
-		"prisma:migrate": "dotenv -e .env.development pnpm exec prisma migrate dev"
+		"prisma:migrate": "dotenv -e .env.development pnpm exec prisma migrate dev",
+		"prisma:reset": "dotenv -e .env.development pnpm exec prisma migrate reset",
+		"prisma:validate": "dotenv -e .env.development pnpm exec prisma validate",
+		"postinstall": "pnpm approve-builds",
+		"start:test": "cross-env NODE_ENV=production node bin/server.js",
+		"start:prod": "node bin/app.js"
+
 	},
 	"dependencies": {
 		"@fastify/cors": "^10.0.1",
