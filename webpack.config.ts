@@ -47,7 +47,10 @@ const config: Configuration = {
                 { from: '.env.production', to: '../' },
                 { from: './dist/app.js', to: '' },
                 { from: './dist/config', to: './config' },
+                { from: './src/views', to: './views' },
                 { from: './prisma', to: '../prisma' },
+                { from: './public', to: '../public' },
+                { from: './logs', to: './logs' },
             ]
         })
     ],
