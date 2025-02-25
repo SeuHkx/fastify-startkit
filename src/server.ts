@@ -1,5 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify'
 import path from "path";
+
 const app:FastifyInstance = Fastify({
     logger: {
         transport: {
@@ -20,16 +21,26 @@ const app:FastifyInstance = Fastify({
     await app.register(import('@/plugins/config-plugin'));
     await app.register(import('@/plugins/logs-plugin'));
     await app.register(import('@/plugins/prisma-plugin'));
+    await app.register(import('@fastify/cookie'));
+    await app.register(import('@/plugins/axios-plugin'),{
+        baseURL:app.env.PROXY_BASE_URL,
+    });
+    await app.register(import('@fastify/view'),{
+        engine: {
+            ejs: import('ejs')
+        },
+        root: path.join(__dirname, 'views'),
+        viewExt:'ejs'
+    });
     await app.register(import('@fastify/static'),{
         root: path.join(__dirname, '../public'),
         prefix: '/public/'
     });
     await app.register(import('@/plugins/auth-plugin'),{
         secret: app.env.JWT_SECRET,
-        noAuthRoutes:['/login']
+        noAuthRoutes:['/login','/public']
     });
-
-    const port = Number(app.env?.PORT) || 3000;
+    const port = Number(app.env?.APP_PORT) || 3000;
     const start = async () => {
         try {
             await app.register(import('@/routes'));

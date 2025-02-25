@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" x-data="login">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/public/js/toastifyjs@1.12.0/toastify.min.css"/>
+    <link rel="stylesheet" href="/public/css/normalize.css"/>
+    <link rel="stylesheet" href="/public/css/bulma/bulma.min.css"/>
+    <link rel="stylesheet" href="/public/css/font/iconfont.css"/>
+    <script src="/public/js/alpinejs@3.14.8/cdn.min.js" defer></script>
+    <style>
+        html{
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+        :root{
+            --bulma-size-normal:14px;
+            --bulma-body-font-size:14px;
+            --bulma-control-size: 14px;
+        }
+        .login-box{
+            margin: 220px auto 0;
+            padding: 20px;
+            width: 320px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box box">
+        <form @submit.prevent="submitFormLogin" method="post" x-ref="form" action="/login">
+            <div class="login-title block">
+                <span class="is-size-5">CNRDS</span>
+            </div>
+            <div class="field">
+                <p class="control has-icons-left has-icons-right">
+                    <input class="input" @focus="state.name = true" :class="state.name ? '':'is-danger'" name="name" type="text" placeholder="账号" x-model="user.name"/>
+                    <span class="icon is-small is-left">
+                        <i class="iconfont icon-zhanghao"></i>
+                    </span>
+                </p>
+            </div>
+            <div class="field">
+                <p class="control has-icons-left">
+                    <input class="input" @focus="state.password = true" :class="state.password ? '':'is-danger'" name="password" type="password" placeholder="密码" x-model="user.password"/>
+                    <span class="icon is-small is-left">
+                        <i class="iconfont icon-mima" style="font-size: 20px"></i>
+                    </span>
+                </p>
+            </div>
+            <div class="field">
+                <div class="buttons">
+                    <button :class="state.button ? 'is-loading':''" class="button is-link is-fullwidth">登录</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+    <script src="/public/js/toastifyjs@1.12.0/toastify-js.js"></script>
+    <script src="/public/js/axios@1.7.9/axios.min.js"></script>
+    <script src="/public/dist/src/login.js"></script>
+</body>
+</html>

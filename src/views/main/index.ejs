@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" x-data="main">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/public/js/filepond-4.28.2/dist/filepond.min.css"/>
+    <link rel="stylesheet" href="/public/js/toastifyjs@1.12.0/toastify.min.css"/>
+    <link rel="stylesheet" href="/public/css/normalize.css"/>
+    <link rel="stylesheet" href="/public/css/bulma/bulma.min.css"/>
+    <link rel="stylesheet" href="/public/css/font/iconfont.css"/>
+    <script src="/public/js/alpinejs@3.14.8/cdn.min.js" defer></script>
+    <style>
+        html{
+            overflow-y: auto;
+        }
+        :root{
+            --bulma-size-normal:14px;
+            --bulma-body-font-size:14px;
+            --bulma-control-size: 14px;
+        }
+        .container{
+            padding: 10px;
+            margin: 10px auto;
+        }
+        .filepond--drop-label.filepond--drop-label label{
+            font-size: 14px;
+        }
+        .filepond--root .filepond--action-remove-item {
+            display: none !important;
+        }
+        .filepond--credits {
+            display: none;
+        }
+        .tippy-content{
+            font-size: 12px !important;
+        }
+        .buttons {
+            gap: .5rem;
+        }
+        .header{
+            height: 45px;
+            background: linear-gradient(30deg,#0053ff,#006eff 70%,#1fadff);
+            box-shadow: 0 3px 6px 0 rgb(21 110 255 / 30%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .header .logo{
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            display: flex;
+            align-items: center;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center; /* 垂直居中 */
+        }
+        .header .user-name {
+            margin-right: 15px; /* 与按钮的间距 */
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            cursor: default;
+            display: flex;
+            align-items: center;
+        }
+        .header .user-name .line{
+            margin-left: 14px;
+        }
+        .header .user-name .user-icon .iconfont{
+            font-size: 14px;
+        }
+        .header .user-name .credentials .iconfont{
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .header .logout-btn {
+            padding: 5px 10px;
+            font-size: 14px;
+            color: #fff;
+            background-color: #007bff; /* 蓝色背景 */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .header .logout-btn:hover {
+            background-color: #0056b3; /* 深蓝色背景 */
+        }
+        .li-tab{
+            position: relative;
+        }
+        .bubble {
+            display: inline-flex;
+            padding: 2px;
+            min-width: 24px;
+            min-height: 24px;
+            background-color: #ff4040;
+            border-radius: 50%;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            /*aspect-ratio: 1 / 1;*/
+        }
+        .bubble-number {
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .tabs{
+            overflow: inherit;
+            overflow-x: inherit;
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="logo">CNRDS</div>
+    <div class="user-info">
+        <div class="user-name">
+            <span class="user-icon">
+                <i class="iconfont icon-zhanghao"></i>
+            </span>
+            <span><%=data.username%></span>
+            <span class="line">|</span>
+            <div :class="{
+        'is-loading': state.accessToken,
+        'has-text-info': state.accessTokenSuccess,
+        'has-text-warning': !state.accessTokenSuccess
+    }" class="button is-ghost has-text-warning" @click="clickGetAccessToken">
+                 <span class="credentials">
+                     <i class="iconfont icon-ico"></i>
+                </span>
+                <span style="font-weight: 700" x-text="state.accessTokenSuccess ? '已获取上报凭证' : '未获取上报凭证'"></span>
+            </div>
+        </div>
+        <div class="logout"></div>
+    </div>
+</header>
+<div class="container">
+    <div class="tabs is-boxed" style="margin-bottom: 10px">
+        <ul>
+            <% data.tabsData.forEach((tab,index) => { %>
+                <li class="li-tab" :class="state.tab === <%=index%>?'is-active':''" @click="tabHandler(<%=index %>)">
+                    <a>
+                        <span class="icon is-small">
+                            <i class="iconfont" :class="state.icons[<%=index%>]" aria-hidden="true"></i>
+                        </span>
+                        <span><%= tab.name %></span>
+                    </a>
+                    <% if (index === 1) { %>
+                        <div x-show="bubble.count > 0 ? true:false" class="bubble">
+                            <span class="bubble-number" x-text="bubble.count"></span>
+                        </div>
+                    <%}%>
+                </li>
+            <% }) %>
+        </ul>
+    </div>
+    <div class="tabs-box">
+        <% data.tabsData.forEach((tab,index) => { %>
+            <div class="boxed" x-show="state.tab === <%=index%>">
+                <% if (index === 0) { %>
+                    <input id="filepond" type="file" name="filepond" class="filepond" accept="application/json"/>
+                <% } else if (index === 1) { %>
+                    <div style="margin-bottom: 10px">
+                        <div style="margin-bottom: 10px" class="buttons">
+                            <button class="button" :class="state.checkAll?'is-loading':''" :disabled="items.selectedItems.length === 0" @click="checkDataAllHandler">
+                                <span class="icon is-small">
+                                  <i class="iconfont icon-xiaoyan"></i>
+                                </span>
+                                <span>校验数据</span>
+                            </button>
+                            <button class="button" :class="state.check?'is-loading':''" :disabled="items.selectedItems.length === 0" @click="">
+                                <span class="icon is-small">
+                                  <i class="iconfont icon-kehushangbao"></i>
+                                </span>
+                                <span>上报数据</span>
+                            </button>
+                            <button class="button" :class="state.deleteAll?'is-loading':''" :disabled="items.selectedItems.length === 0" @click="batchDeleteData">
+                                <span class="icon is-small">
+                                  <i class="iconfont icon-shanchu"></i>
+                                </span>
+                                <span>删除数据</span>
+                            </button>
+                        </div>
+                        <div class="table-container">
+                            <table class="table is-striped is-hoverable is-fullwidth">
+                                <thead>
+                                <tr>
+                                    <th>
+                                        <label class="checkbox" style="vertical-align: middle">
+                                            <input type="checkbox" x-model="state.selectAll" @change="toggleSelectAll"/>
+                                        </label>
+                                    </th>
+                                    <th>名称</th>
+                                    <th>校验状态</th>
+                                    <th>上传时间</th>
+                                    <th>更新时间</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <template x-for="item in items.checkDataTab" :key="item.id">
+                                    <tr>
+                                        <td class="is-vcentered">
+                                            <label class="checkbox" style="vertical-align: middle">
+                                                <input :disabled="item.check === 'REVIEWING'" type="checkbox" :value="item.id" x-model="items.selectedItems"/>
+                                            </label>
+                                        </td>
+                                        <td class="is-vcentered">
+                                            <span x-text="item.name"></span>
+                                        </td>
+                                        <td class="is-vcentered">
+                                            <span :data-tippy-content="item.statusText" :class="{'tag': true,'is-warning': item.check === 'PENDING','is-info': item.check === 'REVIEWING','is-success': item.check === 'APPROVED','is-danger':item.check === 'ERROR'}"  x-text="checkStatus[item.check]"></span>
+                                        </td>
+                                        <td class="is-vcentered">
+                                            <span x-text="item.createdAt"></span>
+                                        </td>
+                                        <td class="is-vcentered">
+                                            <span x-text="item.updatedAt"></span>
+                                        </td>
+                                        <td class="is-vcentered">
+                                            <div class="buttons">
+                                                <button class="button is-small" :disabled="item.check === 'REVIEWING'" :class="state.checkId === item.id?'is-loading':''" @click="checkData(item)">校验</button>
+                                                <button class="button is-small" :disabled="item.check === 'PENDING' || item.check === 'ERROR'">上报</button>
+                                                <button :data-id="item.id" :disabled="item.check === 'REVIEWING_1'"  class="button is-small delete-button" :class="state.deleteId === item.id?'is-loading':''" @click="deleteHandler(item.id)">删除</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                    <div id="bulmaPage"></div>
+                <% } else if (index === 2) { %>
+                    <div></div>
+                <% } %>
+            </div>
+        <% }) %>
+    </div>
+</div>
+<script src="/public/js/tippy-6.3.7/popper.min.js"></script>
+<script src="/public/js/tippy-6.3.7/tippy-bundle.umd.min.js"></script>
+<script src="/public/js/bulmaPage/bulmaPage.js"></script>
+<script src="/public/js/filepond-4.28.2/plugins/filepond-plugin-file-validate-type.js"></script>
+<script src="/public/js/filepond-4.28.2/dist/filepond.min.js"></script>
+<script src="/public/js/filepond-4.28.2/dist/zh-cn.js"></script>
+<script src="/public/js/toastifyjs@1.12.0/toastify-js.js"></script>
+<script src="/public/js/axios@1.7.9/axios.min.js"></script>
+<script src="/public/dist/src/main.js"></script>
+</body>
+</html>

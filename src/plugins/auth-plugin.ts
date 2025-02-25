@@ -9,19 +9,27 @@ declare module 'fastify' {
 const authPlugin: FastifyPluginAsync<FastifyPluginOptions> = async (fastify:FastifyInstance, options) => {
     fastify.register(import('@fastify/jwt'), {
         secret: options.secret,
+        cookie: {
+            cookieName: 'token',
+            signed: false
+        },
         sign: {
-            expiresIn: '3h',
+            expiresIn: '10h',
         },
     });
     fastify.decorate('authenticate', async (request:FastifyRequest, reply:FastifyReply) => {
         try {
             await request.jwtVerify();
         } catch (err) {
-            return reply.status(401).send({
-                success: false,
-                message: '未登录授权',
-                statusCode: 401,
-            });
+            if (request.raw.url === '/main') {
+                return reply.redirect('/login');
+            } else {
+                return reply.status(401).send({
+                    success: false,
+                    message: '未登录授权',
+                    statusCode: 401,
+                });
+            }
         }
     });
     fastify.addHook('onRequest', async (request, reply) => {
