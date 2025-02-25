@@ -11,7 +11,7 @@ import path from 'path';
 
 function terserMinifySync(code: string): string {
     try {
-        return execSync(`npx terser --compress --mangle`, {
+        return execSync(`pnpm exec terser --compress --mangle`, {
             input: code,
             encoding: 'utf8'
         }).toString();
@@ -53,11 +53,11 @@ const config: Configuration = {
             new TerserPlugin({
                 terserOptions: {
                     compress: {
-                        drop_console: true, // 移除 console.log
-                        drop_debugger: true, // 移除 debugger
+                        drop_console: true,
+                        drop_debugger: true,
                     },
                     format: {
-                        comments: false, // 移除注释
+                        comments: false,
                     },
                 },
                 extractComments: false,

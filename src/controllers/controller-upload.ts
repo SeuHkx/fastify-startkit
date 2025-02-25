@@ -18,7 +18,7 @@ export async function uploadController(req: FastifyRequest, reply: FastifyReply)
     let params = {
         name:filename,
         rawData:fileContent,
-        statusText:'点击校验按钮或者数据校验进行CNRDS校验。',
+        statusText:'点击校验按钮或者数据校验进行校验。',
     }
     const item = await serviceUpload(fastify,params);
 
