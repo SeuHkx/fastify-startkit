@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model application {
+  ID              String    @id @db.VarChar(50)
+  ApplicationName String?   @db.VarChar(200)
+  SessionItems    Bytes?
+  Expires         DateTime? @db.DateTime(0)
+  GlobalSessionID String    @db.VarChar(50)
+  Created         DateTime? @db.DateTime(0)
+  LastAccessed    DateTime? @db.DateTime(0)
+
+  @@index([GlobalSessionID], map: "FK_PK_GlobalSession_Application")
+}
