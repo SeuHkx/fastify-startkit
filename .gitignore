@@ -4,6 +4,5 @@ node_modules
 dist
 app
 .env
-prisma
 public
 logs
