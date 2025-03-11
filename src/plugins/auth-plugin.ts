@@ -33,9 +33,11 @@ const authPlugin: FastifyPluginAsync<FastifyPluginOptions> = async (fastify:Fast
         }
     });
     fastify.addHook('onRequest', async (request, reply) => {
-        // 检查是否需要跳过验证
         const urlPath = request.url.split('?')[0];
         if (options.noAuthRoutes) {
+            if (options.noAuthRoutes.includes('*')) {
+                return;
+            }
             for (const route of options.noAuthRoutes) {
                 if (urlPath.startsWith(route)) {
                     return;
