@@ -20,11 +20,11 @@ export default async function controllerCheck(req:FastifyRequest,reply:FastifyRe
     let formData = await controllerCheckFormData(fastify,params,reportId,encryptionKey,rtAuthorization);
     if(!formData.success){
         resData.message = '其他错误！请检查数据或者其他设置是否正确。'
-        resData.statusText = formData.message + ' | ' + params.name + ' | ' + formData.data + ' | ' + formData.success;
+        resData.statusText = formData.message + ' | ' + params.name + ' | ' + JSON.stringify(formData.data) + ' | ' + formData.success;
         resData.success = false;
         resData.data.check = 'ERROR';
     }else {
-        resData.statusText = formData.message + ' | ' + params.name + ' | ' + formData.data + ' | ' + formData.success;
+        resData.statusText = formData.message + ' | ' + params.name + ' | ' + JSON.stringify(formData.data) + ' | ' + formData.success;
     }
     params.check = resData.data.check;
     params.statusText = resData.statusText;
