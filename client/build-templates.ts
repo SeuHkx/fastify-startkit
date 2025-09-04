@@ -15,9 +15,47 @@ import * as esbuild from 'esbuild';
 const fsp = fs.promises;
 const ROOT = process.cwd();
 const SRC_DIR = path.resolve(ROOT, 'client/views');
+const SERVER_VIEWS_DIR = path.resolve(ROOT, 'src/views');
 const OUT_TPL_DIR = path.resolve(ROOT, 'public/dist/src/template');
 const OUT_PAGE_DIR = path.resolve(ROOT, 'public/dist/src/page');
 const OUT_LIB_DIR = path.resolve(ROOT, 'public/dist/src/lib');
+
+// --- Lightweight SSE hot-reload (dev only) ---
+type HotBroadcaster = { broadcast: (event: string, data?: any) => void, url: string } | null;
+let HOT: HotBroadcaster = null;
+
+function startHotReloadServer(port = Number(process.env.HOT_PORT) || 38999) {
+	const http = require('http');
+	const clients: any[] = [];
+	const server = http.createServer((req: any, res: any) => {
+		if (req.url?.startsWith('/__hot')) {
+			res.writeHead(200, {
+				'Content-Type': 'text/event-stream',
+				'Cache-Control': 'no-cache, no-transform',
+				Connection: 'keep-alive',
+				'Access-Control-Allow-Origin': '*',
+			});
+			res.write(`retry: 1000\n\n`);
+			clients.push(res);
+			req.on('close', () => {
+				const i = clients.indexOf(res);
+				if (i >= 0) clients.splice(i, 1);
+			});
+			return;
+		}
+		res.writeHead(204, { 'Access-Control-Allow-Origin': '*' });
+		res.end();
+	});
+	server.listen(port, '0.0.0.0');
+	const broadcast = (event: string, data?: any) => {
+		const payload = typeof data === 'string' ? data : JSON.stringify(data ?? {});
+		clients.forEach((res) => {
+			try { res.write(`event: ${event}\n` + `data: ${payload}\n\n`); } catch {}
+		});
+	};
+	HOT = { broadcast, url: `http://localhost:${port}/__hot` };
+	console.log(`[hot] SSE listening at ${HOT.url}`);
+}
 
 async function ensureDir(dir: string) { await fsp.mkdir(dir, { recursive: true }); }
 async function pathExists(p: string) { try { await fsp.access(p); return true; } catch { return false; } }
@@ -40,6 +78,8 @@ async function compileHbs(absPath: string) {
 		const minified = await terserMinify(wrapper, { module: true, compress: true, mangle: true });
 		await fsp.writeFile(outFile, minified.code || wrapper, 'utf8');
 		console.log('[hbs] Compiled:', `${name} -> ${path.posix.join(dirKey, 'index.js')}`);
+	// broadcast per-page template hot update
+	HOT?.broadcast('hot', { t: Date.now(), pageId: dirKey, kind: 'template' });
 	} catch (err) { console.error('[hbs] Compile error:', absPath, err); }
 }
 
@@ -73,6 +113,8 @@ async function buildOnePageScript(absPath: string) {
 			banner: { js: `/* ${path.relative(ROOT, absPath).replace(/\\/g,'/')} */` },
 		});
 		console.log('[hbs] Built script:', `${path.relative(SRC_DIR, absPath)} -> ${path.relative(OUT_PAGE_DIR, outFile)}`);
+	// broadcast per-page script hot update
+	HOT?.broadcast('hot', { t: Date.now(), pageId: pageRel, kind: 'script' });
 	} catch (e) { console.error('[hbs] Script build failed:', absPath, e); }
 }
 
@@ -141,7 +183,11 @@ async function buildRuntimeBundle() {
 			}
 		});
 
-		const src = `/* auto-generated runtime bundle */\n${importLines.join('\n')}\n\nconst REGISTRY = {\n${registryLines.join(',\n')}\n};\n\nexport function assetVersion(){ return (window as any).__assetVersion__ || Date.now(); }\n\nexport async function importWithVersion(src: string, _ver?: any){ return import(src); }\n\n// 兼容旧接口：页面脚本与模板已内联\nexport async function loadPageScript(_name: string, _importer?: any){ return true as any; }\nexport async function loadTemplate(name: string, _importer?: any){\n  const entry = (REGISTRY as any)[name];\n  if (!entry || !entry.template) throw new Error('模板未注册: ' + name);\n  return entry.template;\n}\n\nexport async function loadOrReplaceScript(key: string, src: string, _ver?: any){\n  const id = 'dyn-' + key;\n  const exists = document.getElementById(id);\n  const s = document.createElement('script');\n  s.type = 'module';\n  s.id = id;\n  s.src = src;\n  if (exists && exists.parentNode) exists.parentNode.replaceChild(s, exists);\n  else document.head.appendChild(s);\n  return new Promise((resolve, reject) => { s.onload = () => resolve(true as any); s.onerror = reject; });\n}\n\nfunction nextTick(fn: () => void){\n  if (typeof (window as any).queueMicrotask === 'function') return (window as any).queueMicrotask(fn);\n  try { Promise.resolve().then(fn); } catch { setTimeout(fn, 0); }\n}\n\nexport async function loadPageContent(pageId: string, _importer?: any){\n  const entry = (REGISTRY as any)[pageId];\n  if (!entry || !entry.template) throw new Error('模板未注册: ' + pageId);\n  const html = entry.template({});\n  nextTick(() => {\n    try {\n      const root = document.getElementById('page-content') || document;\n      runPage(pageId, (window as any).Alpine, root as any);\n    } catch (e) { console.warn('运行页面脚本失败:', e); }\n  });\n  return html;\n}\n\nexport function runPage(pageId: string, Alpine: any, root: any){\n  const entry = (REGISTRY as any)[pageId] || {};\n  if (entry.script && typeof entry.script.register === 'function') {\n    try { entry.script.register(Alpine, root); } catch (e) { console.warn('register 执行失败', pageId, e); }\n    return;\n  }\n  const legacy = (window as any).PageScripts && (window as any).PageScripts[pageId];\n  if (typeof legacy === 'function') {\n    try { legacy(Alpine, root); } catch (e) { console.warn('legacy 脚本执行失败', pageId, e); }\n  }\n}\n`;
+			const src = `/* auto-generated runtime bundle */\n${importLines.join('\n')}\n\nconst REGISTRY: any = {\n${registryLines.join(',\n')}\n};\n\nexport function assetVersion(){ return (window as any).__assetVersion__ || Date.now(); }\n\nexport async function importWithVersion(src: string, _ver?: any){ return import(src); }\n\n// runtime config (root resolver etc.)\nconst CONFIG: any = (window as any).__PageRuntimeConfig || {};\nexport function configure(cfg: any){ Object.assign(CONFIG, cfg || {}); (window as any).__PageRuntimeConfig = CONFIG; }\nexport function getConfig(){ return CONFIG; }\n\n// hot api: get, set and rerender
+		export function __hotGet(name: string){ return REGISTRY[name]; }
+		export function __hotSet(name: string, entry: any){ REGISTRY[name] = entry; }
+
+// 兼容旧接口：页面脚本与模板已内联\nexport async function loadPageScript(_name: string, _importer?: any){ return true as any; }\nexport async function loadTemplate(name: string, _importer?: any){\n  const entry = REGISTRY[name];\n  if (!entry || !entry.template) throw new Error('模板未注册: ' + name);\n  return entry.template;\n}\n\nexport async function loadOrReplaceScript(key: string, src: string, _ver?: any){\n  const id = 'dyn-' + key;\n  const exists = document.getElementById(id);\n  const s = document.createElement('script');\n  s.type = 'module';\n  s.id = id;\n  s.src = src;\n  if (exists && exists.parentNode) exists.parentNode.replaceChild(s, exists);\n  else document.head.appendChild(s);\n  return new Promise((resolve, reject) => { s.onload = () => resolve(true as any); s.onerror = reject; });\n}\n\nfunction nextTick(fn: () => void){\n  if (typeof (window as any).queueMicrotask === 'function') return (window as any).queueMicrotask(fn);\n  try { Promise.resolve().then(fn); } catch { setTimeout(fn, 0); }\n}\n\nfunction getCurrentPageId(){\n  try{ const el = document.querySelector('[data-current-page]'); if (el) return (el as any).getAttribute('data-current-page'); }catch{}\n  try{ return (window as any).__currentPageId; }catch{}\n  return null;\n}\n\nfunction selectEl(sel: any): any {\n  if (!sel) return null;\n  if (typeof sel === 'string') { try { return document.querySelector(sel); } catch { return null; } }\n  if (typeof sel === 'function') { try { return sel(); } catch { return null; } }\n  if (sel && typeof sel === 'object' && (sel as any).nodeType === 1) return sel;\n  return null;\n}\n\nfunction resolveRoot(pageId?: string){\n  try{\n    const cfg = CONFIG || {};\n    if (typeof cfg.getRoot === 'function'){\n      try { const el = cfg.getRoot(pageId); if (el) return el; } catch {}\n    }\n    if (cfg.rootSelector){\n      const el = selectEl(cfg.rootSelector); if (el) return el;\n    }\n    const mark = document.querySelector('[data-page-root]');\n    if (mark) return mark;\n    const el2 = document.getElementById('page-content'); // backward compat\n    if (el2) return el2;\n    return document.body || (document as any);\n  } catch { return document.body || (document as any); }\n}\n\nfunction rerenderPage(pageId: string){\n\ttry{\n\t\tconst entry = REGISTRY[pageId];\n\t\tif (!entry || !entry.template) return false;\n\t\tconst root = resolveRoot(pageId);\n\t\tif (!root) return false;\n\t\t(root as any).innerHTML = entry.template({});\n\t\ttry { (window as any).PageRuntime?.runPage(pageId, (window as any).Alpine, root); } catch {}\n\t\treturn true;\n\t}catch(e){ console.warn('[hot] rerender failed', pageId, e); return false; }\n}\nexport function __hotRerender(pageId: string){ return rerenderPage(pageId); }\n\nexport async function loadPageContent(pageId: string, _importer?: any){\n  const entry = REGISTRY[pageId];\n  if (!entry || !entry.template) throw new Error('模板未注册: ' + pageId);\n  const html = entry.template({});\n  nextTick(() => {\n    try {\n      const root = resolveRoot(pageId) || document;\n      runPage(pageId, (window as any).Alpine, root as any);\n      (window as any).__currentPageId = pageId;\n    } catch (e) { console.warn('运行页面脚本失败:', e); }\n  });\n  return html;\n}\n\nexport function runPage(pageId: string, Alpine: any, root: any){\n  const entry = REGISTRY[pageId] || {};\n  if (entry.script && typeof entry.script.register === 'function') {\n    try { entry.script.register(Alpine, root); } catch (e) { console.warn('register 执行失败', pageId, e); }\n    return;\n  }\n  const legacy = (window as any).PageScripts && (window as any).PageScripts[pageId];\n  if (typeof legacy === 'function') {\n    try { legacy(Alpine, root); } catch (e) { console.warn('legacy 脚本执行失败', pageId, e); }\n  }\n}\n`;
 
 		await fsp.writeFile(tmpEntry, src, 'utf8');
 
@@ -156,6 +202,7 @@ async function buildRuntimeBundle() {
 						bridgeFooter = `\n/* bridge merged from ${path.relative(ROOT, bridgePath).replace(/\\\\/g,'/')} */\n` + bridgeContent + '\n';
 				} catch {}
 
+					const devFooter = HOT ? `\n/* dev live reload (SSE) */\n(function(){\n  try{\n    var port = ${Number(process.env.HOT_PORT) || 38999};\n    var host = (window.location && window.location.hostname) ? window.location.hostname : 'localhost';\n    var proto = (window.location && window.location.protocol) ? window.location.protocol : 'http:';\n    var url = proto + '//' + host + ':' + port + '/__hot';\n    function now(){ return Date.now(); }\n    function json(e){ try { return JSON.parse(e.data||'{}'); } catch { return {}; } }\n    var es = new EventSource(url);\n    es.addEventListener('reload', function(){ try { location.reload(); } catch(e){} });\n    es.addEventListener('hot', async function(e){\n      try{\n        var msg = json(e);\n        var pid = msg.pageId;\n        var kind = msg.kind;\n        if (!pid) return;\n        var PR = (window).PageRuntime || {};\n        var reg = PR && PR.__hotGet ? PR.__hotGet(pid) : null;\n        if (!reg) return;\n        if (kind === 'template'){\n          // force fetch latest built template module via cache-busting import\n          var tplUrl = '/public/dist/src/template/' + pid + '/index.js?t=' + now();\n          var mod = await import(tplUrl);\n          if (mod && mod.default){ var entry = PR.__hotGet(pid) || {}; entry.template = mod.default; PR.__hotSet(pid, entry); }\n          // only rerender if current page matches\n          var cur = (window).__currentPageId || null;\n          if (cur === pid) PR && PR.__hotRerender && PR.__hotRerender(pid);\n        } else if (kind === 'script'){\n          // reload the page esm and rerun register, without full refresh\n          var jsCand1 = '/public/dist/src/page/' + pid + '/index.js?t=' + now();\n          var jsCand2 = '/public/dist/src/page/' + pid + '.js?t=' + now();\n          try { var m = await import(jsCand1); } catch { try { var m = await import(jsCand2); } catch(_){} }\n          if (m){ var entry2 = PR.__hotGet(pid) || {}; for (var k in entry2.script) delete entry2.script[k]; for (var k2 in m) entry2.script[k2] = m[k2]; PR.__hotSet(pid, entry2); }\n          var cur2 = (window).__currentPageId || null;\n          if (cur2 === pid) PR && PR.__hotRerender && PR.__hotRerender(pid);\n        }\n      }catch(err){ console.warn('[hot] event error', err); }\n    });\n    es.onerror = function(){ /* ignore */ };\n    console.log('[hot] connected', url);\n  }catch(e){ console.warn('[hot] disabled', e); }\n})();\n` : '';
 					await esbuild.build({ 
 					entryPoints: [tmpEntry], 
 					bundle: true, 
@@ -166,7 +213,7 @@ async function buildRuntimeBundle() {
 					target: ['es2017'], 
 					outfile: path.join(OUT_LIB_DIR, 'pageRuntime.global.js'), 
 					banner: { js: '/* runtime bundle global (minified) */' },
-					footer: { js: bridgeFooter }
+					footer: { js: bridgeFooter + devFooter }
 				});
 					// 保险：手动追加桥接源码，确保 AppRuntime 可用
 					if (bridgeRaw) {
@@ -177,8 +224,8 @@ async function buildRuntimeBundle() {
 							console.log('[hbs] Bridge appended into IIFE runtime');
 						} catch {}
 					}
-		console.log('[hbs] Built runtime:', path.join(OUT_LIB_DIR, 'pageRuntime.js'));
-		console.log('[hbs] Built runtime(global):', path.join(OUT_LIB_DIR, 'pageRuntime.global.js'));
+	console.log('[hbs] Built runtime:', path.join(OUT_LIB_DIR, 'pageRuntime.js'));
+	console.log('[hbs] Built runtime(global):', path.join(OUT_LIB_DIR, 'pageRuntime.global.js'));
 	} catch (e) { console.error('[hbs] Runtime build failed:', e); }
 }
 
@@ -223,13 +270,23 @@ async function main() {
 	console.log(`[hbs] Output(templates): ${OUT_TPL_DIR}`);
 	console.log(`[hbs] Output(pages): ${OUT_PAGE_DIR}`);
 	console.log(`[hbs] Output(runtime): ${OUT_LIB_DIR}`);
+	if (watch) {
+		// start dev SSE hot reload server BEFORE initial build
+		startHotReloadServer();
+	}
 	await buildPagesOnce();
 	if (watch) {
 		const watcher = chokidar.watch(SRC_DIR, { ignored: /(^|[\/\\])\../, ignoreInitial: true });
 		watcher.on('add', onFsEvent);
 		watcher.on('change', onFsEvent);
 		watcher.on('unlink', onFsUnlink);
-		console.log('[hbs] Watching for changes...');
+		// also watch server EJS views for auto refresh
+		const watcherViews = chokidar.watch(SERVER_VIEWS_DIR, { ignored: /(^|[\/\\])\../, ignoreInitial: true });
+		const onViewsChange = (p: string) => { console.log('[hbs] views changed:', path.relative(ROOT, p)); HOT?.broadcast('reload', { t: Date.now(), kind: 'views' }); };
+		watcherViews.on('add', onViewsChange);
+		watcherViews.on('change', onViewsChange);
+		watcherViews.on('unlink', onViewsChange);
+		console.log('[hbs] Watching for changes... (client/views + src/views)');
 	}
 }
 

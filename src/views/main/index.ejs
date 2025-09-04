@@ -53,7 +53,7 @@
             </div>
             
             <!-- 页面内容容器 - 完全动态加载 -->
-            <div id="page-content" x-show="!state.loading" class="page-content" x-html="state.currentPageContent">
+            <div id="page-content" data-page-root x-show="!state.loading" class="page-content" x-html="state.currentPageContent">
                 <!-- 动态内容将在这里渲染 -->
             </div>
         </div> 
