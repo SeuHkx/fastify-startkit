@@ -29,3 +29,24 @@ export async function controllerLogin(req: FastifyRequest, reply: FastifyReply) 
         reply.send(error);
     }
 }
+
+export async function controllerLogout(req: FastifyRequest, reply: FastifyReply) {
+    try {
+        // 清除cookie中的token
+        reply.clearCookie('token', {
+            path: '/',
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        });
+        return reply.status(200).send({
+            success: true,
+            message: '退出成功'
+        });
+    } catch (error) {
+        return reply.status(500).send({
+            success: false,
+            message: '退出失败'
+        });
+    }
+}

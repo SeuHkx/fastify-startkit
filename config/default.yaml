@@ -2,7 +2,23 @@ app:
   name: App
   version: 1.0.0
   script: server.js
-hospitals:
-  reportId: HD5KB45AWPS91G2B02123
-  reportSecret: NNXSNKLEOEHUUJ8865HKXM1
-  encryptionKey: ANLKOAJKK780LNL
+
+sidebar:
+  title: "硬件管控终端"
+  menu:
+    - id: "network-check"
+      name: "网络检查"
+      url: "#network"
+      active: true
+    - id: "device-type"
+      name: "设备类型配置"
+      url: "#device-type"
+      active: false
+    - id: "input-config"
+      name: "输入点配置"
+      url: "#input-config"
+      active: false
+    - id: "change-password"
+      name: "修改密码"
+      url: "#change-password"
+      active: false

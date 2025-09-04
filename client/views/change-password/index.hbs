@@ -1,0 +1,165 @@
+<!-- auto scaffolded from config: change-password -->
+<section class="main-content-box--container" x-data="changePassword">
+    <div class="container-center">
+        <div class="box-form">
+            
+            <!-- 通用错误信息 -->
+            <div x-show="errors.general" class="notification is-danger is-light" x-text="errors.general"></div>
+            
+            <!-- 新密码 -->
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label">新的密码:</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control has-icons-right">
+                            <input 
+                                class="input" 
+                                :class="{ 'is-danger': errors.newPassword, 'is-success': newPassword && !errors.newPassword }"
+                                :type="showNewPassword ? 'text' : 'password'" 
+                                placeholder="请输入新密码（至少6位，包含字母和数字）"
+                                x-model="newPassword"
+                                @blur="validateNewPassword"
+                                @input="errors.newPassword = ''"
+                            >
+                            <span class="icon is-small is-right is-clickable" @click="togglePasswordVisibility('new')">
+                                <i class="iconfont" :class="showNewPassword ? 'icon-eye-close' : 'icon-eye'"></i>
+                            </span>
+                        </div>
+                        <p x-show="errors.newPassword" class="help is-danger" x-text="errors.newPassword"></p>
+                        <p x-show="newPassword && !errors.newPassword" class="help is-success">密码强度良好</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 确认密码 -->
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label">确认密码:</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control has-icons-right">
+                            <input 
+                                class="input" 
+                                :class="{ 'is-danger': errors.confirmPassword, 'is-success': confirmPassword && !errors.confirmPassword }"
+                                :type="showConfirmPassword ? 'text' : 'password'" 
+                                placeholder="请再次输入新密码"
+                                x-model="confirmPassword"
+                                @blur="validateConfirmPassword"
+                                @input="errors.confirmPassword = ''"
+                            >
+                            <span class="icon is-small is-right is-clickable" @click="togglePasswordVisibility('confirm')">
+                                <i class="iconfont" :class="showConfirmPassword ? 'icon-eye-close' : 'icon-eye'"></i>
+                            </span>
+                        </div>
+                        <p x-show="errors.confirmPassword" class="help is-danger" x-text="errors.confirmPassword"></p>
+                        <p x-show="confirmPassword && !errors.confirmPassword" class="help is-success">密码确认正确</p>
+                    </div>
+                </div>
+            </div>
+            <!-- 操作按钮 -->
+            <div class="field is-horizontal">
+                <div class="field-label"></div>
+                <div class="field-body">
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button 
+                                class="button is-link" 
+                                :class="{ 'is-loading': isLoading }"
+                                :disabled="!isFormValid || isLoading"
+                                @click="submitForm"
+                            >
+                                <span>确认修改</span>
+                            </button>
+                        </div>
+                        <div class="control">
+                            <button 
+                                class="button" 
+                                type="button" 
+                                @click="resetForm"
+                                :disabled="isLoading"
+                            >
+                                <span>重置</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<style>
+    .container-center {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: calc(100vh - 100px);
+        padding-top: 2rem;
+    }
+    .box-form {
+        max-width: 700px;
+        width: 100%;
+        background: white;
+    }
+    .field {
+        margin-bottom: 12px !important;
+    }
+    .field-label {
+        text-align: right;
+        margin-right: 1rem !important;
+        min-width: 120px;
+    }
+    .field-label .label {
+        font-weight: 600;
+        color: #363636;
+    }
+    .icon.is-clickable {
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .icon.is-clickable:hover {
+        color: #3273dc;
+    }
+    .help {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    .notification {
+        margin-bottom: 1.5rem;
+    }
+    .notification ul {
+        margin: 0;
+        padding-left: 1rem;
+    }
+    .notification li {
+        margin-bottom: 0.25rem;
+    }
+    .button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    .field.has-addons .control:not(:last-child) {
+        margin-right: 0;
+    }
+    
+    /* 响应式设计 */
+    @media screen and (max-width: 768px) {
+        .container-center {
+            padding: 1rem;
+        }
+        .box-form {
+            padding: 1.5rem;
+        }
+        .field.is-horizontal {
+            display: block;
+        }
+        .field-label {
+            text-align: left;
+            margin-right: 0 !important;
+            margin-bottom: 0.5rem;
+            min-width: auto;
+        }
+    }
+</style>

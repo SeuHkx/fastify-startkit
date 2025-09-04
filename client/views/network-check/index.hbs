@@ -1,0 +1,198 @@
+<!-- auto scaffolded from config: network-check -->
+<section class="main-content-box--container" x-data="networkCheck">
+  <div class="container-center">
+    <div class="box-form">
+      <!-- 通用错误信息 -->
+      <div x-show="errors.general" class="notification is-danger is-light" x-text="errors.general"></div>
+      
+      <div x-show="!isLoading">
+        <div class="field is-horizontal">
+          <div class="field-label is-normal">
+            <label class="label">MAC地址:</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <input 
+                  class="input" 
+                  :class="{ 'is-danger': errors.macAddress }"
+                  type="text" 
+                  placeholder="请输入MAC地址 (如: 00.07.ce.aa.bc.cc)" 
+                  x-model="form.macAddress"
+                  @blur="validateField('macAddress')"
+                  @input="errors.macAddress = ''"
+                >
+              </div>
+              <p x-show="errors.macAddress" class="help is-danger" x-text="errors.macAddress"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="field is-horizontal">
+          <div class="field-label is-normal">
+            <label class="label">IP地址:</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <input 
+                  class="input" 
+                  :class="{ 'is-danger': errors.ipAddress }"
+                  type="text" 
+                  placeholder="请输入IP地址 (如: 192.168.1.55)" 
+                  x-model="form.ipAddress"
+                  @blur="validateField('ipAddress')"
+                  @input="errors.ipAddress = ''"
+                >
+              </div>
+              <p x-show="errors.ipAddress" class="help is-danger" x-text="errors.ipAddress"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="field is-horizontal">
+          <div class="field-label is-normal">
+            <label class="label">子网掩码:</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <input 
+                  class="input" 
+                  :class="{ 'is-danger': errors.subnetMask }"
+                  type="text" 
+                  placeholder="请输入子网掩码 (如: 255.255.255.0)" 
+                  x-model="form.subnetMask"
+                  @blur="validateField('subnetMask')"
+                  @input="errors.subnetMask = ''"
+                >
+              </div>
+              <p x-show="errors.subnetMask" class="help is-danger" x-text="errors.subnetMask"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="field is-horizontal">
+          <div class="field-label is-normal">
+            <label class="label">默认网关:</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <input 
+                  class="input" 
+                  :class="{ 'is-danger': errors.gateway }"
+                  type="text" 
+                  placeholder="请输入默认网关 (如: 192.168.1.1)" 
+                  x-model="form.gateway"
+                  @blur="validateField('gateway')"
+                  @input="errors.gateway = ''"
+                />
+              </div>
+              <p x-show="errors.gateway" class="help is-danger" x-text="errors.gateway"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="field is-horizontal">
+          <div class="field-label">
+            <!-- 空标签，用于对齐 -->
+          </div>
+          <div class="field-body">
+            <div class="field is-grouped">
+              <div class="control">
+                <button 
+                  class="button is-link" 
+                  :class="{ 'is-loading': isSaving }"
+                  :disabled="!isFormValid || isSaving"
+                  @click="saveNetworkSettings"
+                >
+                  <span>保存设置</span>
+                </button>
+              </div>
+              <div class="control">
+                <button 
+                  class="button" 
+                  type="button" 
+                  @click="loadNetworkSettings"
+                  :disabled="isLoading || isSaving"
+                >
+                  <span>刷新</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+  .container-center {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: calc(100vh - 100px);
+    padding-top: 2rem;
+  }
+  .box-form {
+    max-width: 700px;
+    width: 100%;
+    background: white;
+  }
+  .field {
+    margin-bottom: 12px !important;
+  }
+  .field-label {
+    text-align: right;
+    margin-right: 1rem !important;
+    min-width: 120px;
+  }
+  .field-label .label {
+    font-weight: 600;
+    color: #363636;
+  }
+  .help {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+  .notification {
+    margin-bottom: 1.5rem;
+  }
+  .button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .field.is-grouped .control:not(:last-child) {
+    margin-right: 0.75rem;
+  }
+  
+  /* 加载动画 */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .icon-loading {
+    animation: spin 1s linear infinite;
+  }
+  
+  /* 响应式设计 */
+  @media screen and (max-width: 768px) {
+    .container-center {
+      padding: 1rem;
+    }
+    .box-form {
+      padding: 1.5rem;
+    }
+    .field.is-horizontal {
+      display: block;
+    }
+    .field-label {
+      text-align: left;
+      margin-right: 0 !important;
+      margin-bottom: 0.5rem;
+      min-width: auto;
+    }
+  }
+</style>

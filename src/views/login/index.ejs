@@ -10,19 +10,31 @@
     <link rel="stylesheet" href="/public/css/font/iconfont.css"/>
     <script src="/public/js/alpinejs@3.14.8/cdn.min.js" defer></script>
     <style>
-        html{
-            background: #f4f4f4;
+        html, body{
+            background: #215BDB;
             overflow-y: auto;
+            height: 100%;
+            margin: 0;
+            padding: 0;
         }
         :root{
             --bulma-size-normal:14px;
             --bulma-body-font-size:14px;
             --bulma-control-size: 14px;
         }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
         .login-box{
-            margin: 220px auto 0;
-            padding: 20px;
+            margin-top: -200px;
             width: 320px;
+            padding: 20px;
+        }
+        .login-box .field{
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -30,11 +42,11 @@
     <div class="login-box box">
         <form @submit.prevent="submitFormLogin" method="post" x-ref="form" action="/login">
             <div class="login-title block">
-                <span class="is-size-5">CNRDS</span>
+                <span class="is-size-5">欢迎登录系统</span>
             </div>
             <div class="field">
                 <p class="control has-icons-left has-icons-right">
-                    <input class="input" @focus="state.name = true" :class="state.name ? '':'is-danger'" name="name" type="text" placeholder="账号" x-model="user.name"/>
+                    <input class="input" @focus="state.name = true" :class="state.name ? '':'is-danger'" name="name" type="text" placeholder="输入账号" x-model="user.name"/>
                     <span class="icon is-small is-left">
                         <i class="iconfont icon-zhanghao"></i>
                     </span>
@@ -42,7 +54,7 @@
             </div>
             <div class="field">
                 <p class="control has-icons-left">
-                    <input class="input" @focus="state.password = true" :class="state.password ? '':'is-danger'" name="password" type="password" placeholder="密码" x-model="user.password"/>
+                    <input class="input" @focus="state.password = true" :class="state.password ? '':'is-danger'" name="password" type="password" placeholder="输入密码" x-model="user.password"/>
                     <span class="icon is-small is-left">
                         <i class="iconfont icon-mima" style="font-size: 20px"></i>
                     </span>
@@ -54,7 +66,6 @@
                 </div>
             </div>
         </form>
-
     </div>
     <script src="/public/js/toastifyjs@1.12.0/toastify-js.js"></script>
     <script src="/public/js/axios@1.7.9/axios.min.js"></script>

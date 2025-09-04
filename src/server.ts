@@ -20,7 +20,6 @@ const app:FastifyInstance = Fastify({
     await app.register(import('@/plugins/env-plugin'));
     await app.register(import('@/plugins/config-plugin'));
     await app.register(import('@/plugins/logs-plugin'));
-    await app.register(import('@/plugins/prisma-plugin'));
     await app.register(import('@fastify/cookie'));
     await app.register(import('@/plugins/axios-plugin'),{
         baseURL:app.env.PROXY_BASE_URL,

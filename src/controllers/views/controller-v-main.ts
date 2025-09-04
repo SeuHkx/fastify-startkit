@@ -2,24 +2,19 @@ import {FastifyInstance, FastifyReply, FastifyRequest} from "fastify";
 
 export default async function controllerVMain(req:FastifyRequest,reply:FastifyReply){
     const fastify:FastifyInstance = req.server;
-    let tabsData = [
-        {
-            name:'上传数据'
-        },
-        {
-            name:'待处理数据'
-        },
-        {
-            name:'已完成'
-        }
-    ]
     const token:any = req.cookies.token;
     const user:any = fastify.jwt.verify(token);
+    
+    // 获取sidebar配置
+    const sidebarConfig = {
+        title: fastify.config.get('sidebar.title'),
+        menu: fastify.config.get('sidebar.menu')
+    };
     return reply.view('main/index', {
-        title: '数据上报',
+        title: '硬件管控终端系统平台',
         data:{
-            tabsData: tabsData,
-            username:user.name
+            username: user.name,
+            sidebar: sidebarConfig
         }
     });
 }

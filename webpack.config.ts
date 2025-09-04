@@ -87,7 +87,6 @@ const config: Configuration = {
                 { from: '.env.production', to: '../' },
                 { from: './dist/ecosystem.config.js', to: '' },
                 { from: './config', to: '../config' },
-                { from: './prisma', to: '../prisma' },
                 { from: './public', to: '../public' },
                 { from: './logs', to: '../logs' },
                 {
