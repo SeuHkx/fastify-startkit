@@ -8,10 +8,13 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "[1/3] Build with webpack..."
+echo "[1/4] Clean previous build outputs (app/ and .tmp)..."
+rm -rf "$ROOT_DIR/app" "$ROOT_DIR/.tmp"
+
+echo "[2/4] Build with webpack..."
 pnpm webpack
 
-echo "[2/3] Resolve app version..."
+echo "[3/4] Resolve app version..."
 APP_ENV_FILE="app/.env.production"
 if [[ ! -f "$APP_ENV_FILE" ]]; then
   echo "Error: $APP_ENV_FILE not found."
@@ -27,8 +30,24 @@ RELEASE_DIR="$ROOT_DIR/releases"
 PKG_NAME="hardwareNode-app-${APP_VERSION}-${TS}.tar.gz"
 mkdir -p "$RELEASE_DIR"
 
-echo "[3/3] Create package ${PKG_NAME} ..."
-tar -C "$ROOT_DIR/app" -czf "$RELEASE_DIR/$PKG_NAME" .
+echo "[4/4] Create package ${PKG_NAME} ..."
+# 额外清理 macOS 遗留文件，避免被打包
+find "$ROOT_DIR/app" -name '.DS_Store' -type f -delete 2>/dev/null || true
+find "$ROOT_DIR/app" -name '._*' -type f -delete 2>/dev/null || true
+
+# 排除 macOS 生成的无用文件（AppleDouble/资源分叉等）
+# - .DS_Store：目录预览缓存
+# - ._*：AppleDouble 资源分叉文件（可能由 bsdtar 为扩展属性临时生成）
+# - __MACOSX：Finder 创建的目录
+# 通过 COPYFILE_DISABLE=1 禁用打包时写入 AppleDouble 元数据
+COPYFILE_DISABLE=1 \
+tar -C "$ROOT_DIR/app" \
+  --exclude='.DS_Store' \
+  --exclude='*/.DS_Store' \
+  --exclude='._*' \
+  --exclude='*/._*' \
+  --exclude='__MACOSX' \
+  -czf "$RELEASE_DIR/$PKG_NAME" .
 
 echo "Done. Package: $RELEASE_DIR/$PKG_NAME"
 echo "Next: copy this file to your CentOS server and run scripts/deploy-on-centos.sh there."

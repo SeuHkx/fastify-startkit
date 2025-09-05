@@ -3,16 +3,23 @@ import fastifyPlugin from 'fastify-plugin';
 import pino from 'pino';
 
 const logsPlugin: FastifyPluginAsync<FastifyPluginOptions> = async (fastify) => {
+    const isDev = process.env.NODE_ENV !== 'production';
+
     const logger = pino({
         level: 'info',
-        transport: {
-            target: 'pino-pretty',
-            options: {
-                colorize: true,
-                translateTime: 'SYS:standard',
-                ignore: 'pid,hostname'
+        // 在开发环境使用 pino-pretty，美化输出；生产环境保持默认 JSON，避免对 dev 依赖的要求
+        ...(isDev
+            ? {
+                transport: {
+                    target: 'pino-pretty',
+                    options: {
+                        colorize: true,
+                        translateTime: 'SYS:standard',
+                        ignore: 'pid,hostname'
+                    }
+                }
             }
-        },
+            : {}),
         formatters: {
             log(object) {
                 return {

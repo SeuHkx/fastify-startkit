@@ -18,7 +18,7 @@ export async function controllerLogin(req: FastifyRequest, reply: FastifyReply) 
             });
             return reply.setCookie('token',token,{
                 path: '/',
-                secure: true,
+                secure: false,
                 httpOnly: true,
                 sameSite: true
             }).redirect('/main');

@@ -1,20 +1,31 @@
 import dotenv from "dotenv";
 import path from "path";
+
+// Load production env but keep running even if file is missing
 dotenv.config({
     path: path.resolve(__dirname, '../.env.production')
 });
-const NODE_CONFIG_DIR = path.resolve(__dirname, '../config');
-const LOGGING_OUTS    = path.resolve(__dirname, "../", process.env.APP_LOGGING_OUTS as string);
-const LOGGING_ERROR   = path.resolve(__dirname, "../", process.env.APP_LOGGING_ERROR as string);
+
+// Safe defaults
+const CWD = path.resolve(__dirname, '..'); // points to app/
+const APP_NAME = process.env.APP_NAME || 'app';
+const APP_VERSION = process.env.APP_VERSION || '1.0.0';
+const APP_PORT = process.env.APP_PORT || '3000';
+const APP_SCRIPT = process.env.APP_SCRIPT || 'bin/server.js';
+
+const NODE_CONFIG_DIR = path.resolve(CWD, 'config');
+const LOGGING_OUTS  = path.resolve(CWD, process.env.APP_LOGGING_OUTS  || 'logs/outs/outs.log');
+const LOGGING_ERROR = path.resolve(CWD, process.env.APP_LOGGING_ERROR || 'logs/error/error.log');
 
 const app:any = {
-    name  :  process.env.APP_NAME,
-    script:  process.env.APP_SCRIPT,
-    outs:    process.env.APP_LOGGING_OUTS,
-    error:   process.env.APP_LOGGING_ERROR,
-    version: process.env.APP_VERSION,
-    port:    process.env.APP_PORT
+    name  :  APP_NAME,
+    script:  APP_SCRIPT,
+    outs:    LOGGING_OUTS,
+    error:   LOGGING_ERROR,
+    version: APP_VERSION,
+    port:    APP_PORT
 }
+
 const pm2Config = {
     apps:[
         {
@@ -23,6 +34,7 @@ const pm2Config = {
             exec_mode: 'fork',
             instances: 1,
             watch: false,
+            cwd: CWD,
             error_file:LOGGING_ERROR,
             out_file:LOGGING_OUTS,
             log_date_format: "YYYY-MM-DD HH:mm:ss",

@@ -26,6 +26,11 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 echo "Extracting package..."
 tar -C "$TMP_DIR" -xzf "$PKG_PATH"
 
+# Cleanup possible AppleDouble files if tar produced any (some tar versions may)
+find "$TMP_DIR" -name '.DS_Store' -type f -delete 2>/dev/null || true
+find "$TMP_DIR" -name '._*' -type f -delete 2>/dev/null || true
+find "$TMP_DIR" -name '__MACOSX' -type d -prune -exec rm -rf {} + 2>/dev/null || true
+
 echo "Sync files to $DEPLOY_DIR/app ..."
 mkdir -p "$DEPLOY_DIR/app"
 rsync -a --delete "$TMP_DIR"/ "$DEPLOY_DIR/app"/

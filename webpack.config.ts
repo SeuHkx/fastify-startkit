@@ -1,4 +1,4 @@
-import {Configuration} from 'webpack';
+import { fileURLToPath } from 'url';
 import nodeExternals from 'webpack-node-externals';
 import WebpackObfuscator from 'webpack-obfuscator';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
@@ -8,6 +8,10 @@ import TerserPlugin from 'terser-webpack-plugin';
 import JavaScriptObfuscator from 'javascript-obfuscator';
 import {execSync} from 'child_process';
 import path from 'path';
+
+// __dirname shim for ESM-loaded config
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function terserMinifySync(code: string): string {
     try {
@@ -21,7 +25,7 @@ function terserMinifySync(code: string): string {
     }
 }
 
-const config: Configuration = {
+const config: any = {
     mode: 'production',
     entry: './dist/server.js',
     target: 'node',
@@ -85,7 +89,8 @@ const config: Configuration = {
                 { from: 'Dockerfile', to: '../' },
                 { from: '.env.development', to: '../' },
                 { from: '.env.production', to: '../' },
-                { from: './dist/ecosystem.config.js', to: '' },
+                // copy PM2 config file next to bin/, but our start script references bin/ecosystem.config.js
+                { from: './dist/ecosystem.config.js', to: './ecosystem.config.js' },
                 { from: './config', to: '../config' },
                 { from: './public', to: '../public' },
                 { from: './logs', to: '../logs' },

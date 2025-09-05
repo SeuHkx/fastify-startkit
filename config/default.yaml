@@ -14,9 +14,16 @@ sidebar:
       name: "设备类型配置"
       url: "#device-type"
       active: false
+    - id: "device-management"
+      name: "设备管理"
+      url: "#device-management"
     - id: "input-config"
       name: "输入点配置"
       url: "#input-config"
+      active: false
+    - id: "output-config"
+      name: "输出点配置"
+      url: "#output-config"
       active: false
     - id: "change-password"
       name: "修改密码"
