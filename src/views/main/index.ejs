@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light" x-data="main" x-init='initWithData(<%- JSON.stringify(data.sidebar.menu) %>)'>
+<html lang="en" data-theme="light" x-data="main" x-init="initWithData(window.__SIDEBAR_MENU || [])">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,19 @@
     <link rel="stylesheet" href="/public/css/bulma/bulma.min.css"/>
     <link rel="stylesheet" href="/public/css/font/iconfont.css"/>
     <link rel="stylesheet" href="/public/dist/css/main.css"/>
+    <!-- 预载侧边栏菜单数据：通过独立 JSON script 避免在 x-init 属性内嵌大型 / 包含引号的数据导致截断或压缩破坏 -->
+    <script id="SIDEBAR_MENU_DATA" type="application/json"><%- JSON.stringify(data.sidebar.menu) %></script>
+    <script>
+        (function(){
+            try {
+                var raw = document.getElementById('SIDEBAR_MENU_DATA');
+                window.__SIDEBAR_MENU = raw ? JSON.parse(raw.textContent || '[]') : [];
+            } catch(e) {
+                window.__SIDEBAR_MENU = [];
+                console.warn('[SIDEBAR_MENU-json-error]', e);
+            }
+        })();
+    </script>
     <script src="/public/js/alpinejs@3.14.8/cdn.min.js" defer></script>
 </head>
 <body>
@@ -35,6 +48,21 @@
     <!-- 主内容区域 -->
     <main class="main-content">
         <div class="main-content-title">
+            <div>
+                <nav class="breadcrumb" aria-label="breadcrumbs">
+                    <ul>
+                        <template x-for="(item, index) in getBreadcrumbPath()" :key="item.id">
+                            <li :class="{ 'is-active': item.active }" :aria-current="item.active ? 'page' : null">
+                                <a href="#"
+                                   x-text="item.name"
+                                   @click.prevent="item.active ? null : navigateToBreadcrumb(item)"
+                                   :class="{ 'cursor-default': item.active }">
+                                </a>
+                            </li>
+                        </template>
+                    </ul>
+                </nav>
+            </div>
             <div class="user-info">
                 <div class="user-name">
                     <span class="user-icon">
@@ -42,8 +70,8 @@
                     </span>
                     <span class="user-welcome">欢迎,</span>
                     <span><%=data.username%></span>
-            </div>
-                <button class="button is-danger" :class="state.logout ? 'is-loading':''" @click="logout()">退出</button>
+                </div>
+                <button class="button is-text" :class="state.logout ? 'is-loading':''" @click="logout()">退出</button>
             </div>
         </div>
         <div class="main-content-box">
@@ -51,7 +79,6 @@
             <div x-show="state.loading" class="loading-overlay">
                 <div class="loading-spinner"></div>
             </div>
-            
             <!-- 页面内容容器 - 完全动态加载 -->
             <div id="page-content" data-page-root x-show="!state.loading" class="page-content" x-html="state.currentPageContent">
                 <!-- 动态内容将在这里渲染 -->
@@ -64,6 +91,9 @@
 <script src="/public/js/toastifyjs@1.12.0/toastify-js.js"></script>
 <script src="/public/js/axios@1.7.9/axios.min.js"></script>
 <script src="/public/dist/src/lib/pageRuntime.global.js"></script>
+<script src="/public/dist/src/extensions/breadcrumb-extension.js"></script>
+<script src="/public/dist/src/extensions/pagination-extension.js"></script>
 <script src="/public/dist/src/main.js"></script>
+<!-- 已移除 Alpine 调试脚本，如需再次排查可回滚历史 -->
 </body>
 </html>

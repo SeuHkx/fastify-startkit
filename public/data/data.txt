@@ -1,0 +1,2 @@
+<u>[username=admin;password=admin;]</u>
+<net>[mac=00:07:ce:aa:bc:cc;ip=192.168.1.56;mask=255.255.255.0;gateway=192.168.1.1;]</net>!!

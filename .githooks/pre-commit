@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Fail fast
+set -euo pipefail
+
+# 简单规则：拒绝在 EJS 的 x-* 属性内联大型 JSON 或 JSON.stringify
+# 可通过环境变量 BYPASS_X_ATTR_GUARD=1 跳过（不建议）
+
+if [ "${BYPASS_X_ATTR_GUARD:-0}" = "1" ]; then
+  echo "[pre-commit] BYPASS_X_ATTR_GUARD=1 set, skipping checks." >&2
+  exit 0
+fi
+
+changed_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.ejs$' || true)
+if [ -z "$changed_files" ]; then
+  exit 0
+fi
+
+fail=0
+while IFS= read -r f; do
+  # 只检查存在的文件
+  [ -f "$f" ] || continue
+  if grep -E "x-(init|data|on|bind|model)\s*=\s*['\"][^'\"]{150,}" "$f" >/dev/null; then
+    echo "[x-attr-guard] $f: 属性值过长(>=150) 可能包含大型 JSON，建议改为 <script type=application/json> 注入。" >&2
+    fail=1
+  fi
+  if grep -E "x-(init|data|on|bind|model)\s*=\s*['\"][^'\"]*JSON\.stringify\(" "$f" >/dev/null; then
+    echo "[x-attr-guard] $f: 检测到 JSON.stringify 内联在 x-* 属性中，存在被压缩/混淆破坏的风险。" >&2
+    fail=1
+  fi
+  if grep -E "x-(init|data|on|bind|model)\s*=\s*['\"][^'\"]*(\[\s*\{|\{\s*\[)" "$f" >/dev/null; then
+    echo "[x-attr-guard] $f: 检测到 [{ 或 {[, 建议将数据移出属性，改为 window 变量或 JSON script。" >&2
+    fail=1
+  fi
+
+done <<< "$changed_files"
+
+if [ "$fail" = "1" ]; then
+  echo "[pre-commit] 检查未通过，可设置 BYPASS_X_ATTR_GUARD=1 临时绕过，但不建议。" >&2
+  exit 1
+fi
+
+exit 0

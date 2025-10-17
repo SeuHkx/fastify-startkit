@@ -1,0 +1,75 @@
+<section class="main-content-box--container" x-data="configManagement">
+  <div class="main-content-box--content">
+    <!-- 配置文件列表 -->
+    <div class="">
+      <template x-for="config in configList" :key="config.id">
+        <div class="card mb-4">
+          <div class="card-content">
+            <div class="media">
+              {{!-- <div class="media-left">
+                <figure class="image is-48x48">
+                  <div class="has-text-centered" style="font-size: 2rem; line-height: 48px;" x-text="getFileIcon(config.fileName)"></div>
+                </figure>
+              </div> --}}
+              <div class="media-content">
+                <p class="title is-6" x-text="config.name"></p>
+                <p class="subtitle is-6 has-text-grey" x-text="config.description"></p>
+              </div>
+              <div class="media-right">
+                <button class="button is-primary" @click="downloadConfig(config)">
+                  <span class="icon">
+                    <i class="iconfont icon-shangchuan"></i>
+                  </span>
+                  <span>下载</span>
+                </button>
+              </div>
+            </div>
+            
+            <div class="content">
+              <div class="columns is-mobile">
+                <div class="column">
+                  <strong>文件名：</strong>
+                  <span x-text="config.fileName"></span>
+                </div>
+                <div class="column">
+                  <strong>文件大小：</strong>
+                  <span x-text="config.size"></span>
+                </div>
+                <div class="column">
+                  <strong>最后修改：</strong>
+                  <span x-text="config.lastModified"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+      
+      <!-- 空状态 -->
+      <div x-show="configList.length === 0" class="has-text-centered py-6">
+        <div class="is-size-1 has-text-grey-light mb-4">
+          📁
+        </div>
+        <p class="has-text-grey">暂无配置文件</p>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+  .media{
+    align-items: center !important;
+    margin-bottom: 6px !important;
+  }
+  .title.is-6{
+    font-size: 14px;
+  }
+  .subtitle.is-6{
+    font-size: 13px;
+  }
+  .title{
+    margin-bottom: 6px !important;
+  }
+  .card-content{
+    padding: 10px;
+  }
+</style>

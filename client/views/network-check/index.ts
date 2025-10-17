@@ -60,8 +60,12 @@ export function register(Alpine: any, _root: Document){
 
     // 验证MAC地址格式
     validateMAC(mac: string): boolean {
-      const macRegex = /^([0-9A-Fa-f]{2}[.-:]){5}([0-9A-Fa-f]{2})$/;
-      return macRegex.test(mac);
+      // 支持三种常见格式：XX:XX:XX:XX:XX:XX, XX-XX-XX-XX-XX-XX, XX.XX.XX.XX.XX.XX
+      const macRegexColon = /^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$/;
+      const macRegexHyphen = /^([0-9A-Fa-f]{2}-){5}[0-9A-Fa-f]{2}$/;
+      const macRegexDot = /^([0-9A-Fa-f]{2}\.){5}[0-9A-Fa-f]{2}$/;
+      
+      return macRegexColon.test(mac) || macRegexHyphen.test(mac) || macRegexDot.test(mac);
     },
 
     // 验证表单字段
@@ -71,7 +75,7 @@ export function register(Alpine: any, _root: Document){
           if (!this.form.macAddress) {
             this.errors.macAddress = '请输入MAC地址';
           } else if (!this.validateMAC(this.form.macAddress)) {
-            this.errors.macAddress = 'MAC地址格式不正确，应为 XX.XX.XX.XX.XX.XX 格式';
+            this.errors.macAddress = 'MAC地址格式不正确，支持格式：XX:XX:XX:XX:XX:XX 或 XX-XX-XX-XX-XX-XX 或 XX.XX.XX.XX.XX.XX';
           } else {
             this.errors.macAddress = '';
           }

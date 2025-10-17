@@ -1,0 +1,83 @@
+{{!-- AI点位配置表格 --}}
+<div class="tabs-box" x-show="activeTab === 'AI'">
+    <div style="display: flex; gap: 0.5rem; align-items: center;justify-content: flex-end;margin-bottom: 10px;">
+        <button type="button" class="is-link button" @click="addPoint('AI')">
+            添加
+        </button>
+        <button type="button" 
+                class="button" 
+                @click="deleteSelectedPoints('AI')"
+                :disabled="selectedPointsAI.length === 0">
+            删除
+        </button>
+    </div>
+    <table class="points-table">
+        <thead>
+            <tr>
+                <th>
+                    <input type="checkbox" 
+                          @change="toggleAllPoints('AI', $event)" 
+                          :checked="isAllPointsSelectedAI">
+                </th>
+                <th>序号</th>
+                <th>点位类型</th>
+                <th>code</th>
+                <th>状态反馈</th>
+                <th>值</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="(point, index) in pointsAI" :key="point.id">
+                <tr>
+                    <td>
+                        <input type="checkbox" 
+                              :value="point.id" 
+                              x-model="selectedPointsAI">
+                    </td>
+                    <td x-text="index + 1"></td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.type" 
+                              disabled
+                              />
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.code" 
+                              placeholder="请输入">
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.statusFeedback" 
+                              placeholder="请输入">
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="number" 
+                              x-model.number="point.value" 
+                              placeholder="0"
+                              style="width: 80px;">
+                    </td>
+                    <td>
+                        <button type="button" 
+                                class="delete-point-btn" 
+                                @click="deletePoint('AI', index)">
+                            删除
+                        </button>
+                    </td>
+                </tr>
+            </template>
+            <template x-if="pointsAI.length === 0">
+                <tr>
+                    <td colspan="7" class="has-text-centered has-text-grey">
+                        <span>暂无AI类型的点位配置，请点击'添加'按钮添加点位</span>
+                    </td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</div>

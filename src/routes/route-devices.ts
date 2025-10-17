@@ -1,26 +1,32 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
-import { 
-    controllerGetDevices, 
-    controllerUpdateDevices, 
-    controllerAddDevice, 
-    controllerDeleteDevices 
+import {
+    controllerGetDevices,
+    controllerUpdateDevices,
+    controllerAddDevice,
+    controllerDeleteDevices,
+    controllerGetDeviceTypes,
+    controllerGetDeviceType,
+    controllerAddDeviceType,
+    controllerUpdateDeviceType,
+    controllerDeleteDeviceType
 } from '@/controllers/controller-devices';
 
 /**
- * 设备类型相关路由
+ * 设备相关路由
  */
 const devicesRoute: FastifyPluginAsync = async (app: FastifyInstance) => {
-    // 获取设备列表接口
+    // 设备管理接口
     app.get('/devices', controllerGetDevices);
-    
-    // 更新设备列表接口
-    app.put('/devices', controllerUpdateDevices);
-    
-    // 添加设备接口
+    app.post('/devices/update', controllerUpdateDevices);
     app.post('/devices', controllerAddDevice);
-    
-    // 删除设备接口
-    app.delete('/devices', controllerDeleteDevices);
+    app.post('/devices/delete', controllerDeleteDevices);
+
+    // 设备类型管理接口
+    app.get('/devices/types', controllerGetDeviceTypes);
+    app.get('/devices/types/:id', controllerGetDeviceType);
+    app.post('/devices/types', controllerAddDeviceType);
+    app.post('/devices/types/:id/delete', controllerDeleteDeviceType);
+    app.post('/devices/types/:id', controllerUpdateDeviceType);
 };
 
 export default devicesRoute;

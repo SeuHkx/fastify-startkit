@@ -1,10 +1,30 @@
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * 数据解析器 - 将硬件配置文本格式转换为JSON格式
  */
 export class DataParser {
+  /**
+   * 提取通道字符串中的数字部分
+   * 例如: "DI2" -> "2", "DO15" -> "15", "AI3" -> "3"
+   * 如果没有数字或格式不符，返回原值
+   */
+  private static extractChannelNumber(channel: string): string {
+    if (!channel || typeof channel !== 'string') {
+      return channel;
+    }
+    
+    // 匹配 DI/DO/AI/AO 后面的数字
+    const match = channel.match(/^(?:DI|DO|AI|AO)(\d+)$/i);
+    if (match && match[1]) {
+      return match[1];
+    }
+    
+    // 如果不匹配标准格式，返回原值
+    return channel;
+  }
+
   /**
    * 解析标签内容，提取键值对
    * @param content 标签内容 例如：[username=admin;password=admin;]
@@ -76,22 +96,35 @@ export class DataParser {
    * @param line 设备配置行
    * @returns 设备配置数组
    */
-  private static parseDevices(line: string): Array<{ name: string; type: string; DINum: number; DONum: number }> {
+  private static parseDevices(line: string): Array<{ name: string; type: string; DINum: number; DONum: number; AINum?: number; conaddr?: number; retadd?: number }> {
     const match = line.match(/<dev>(.*?)<\/dev>/);
     if (!match) throw new Error('Invalid device format');
     
-    const devices: Array<{ name: string; type: string; DINum: number; DONum: number }> = [];
+    const devices: Array<{ name: string; type: string; DINum: number; DONum: number; AINum?: number; conaddr?: number; retadd?: number }> = [];
     const deviceMatches = match[1].match(/\[[^\]]+\]/g);
     
     if (deviceMatches) {
       deviceMatches.forEach(deviceMatch => {
         const parsed = this.parseTagContent(deviceMatch);
-        devices.push({
+        const device: any = {
           name: parsed.name as string,
           type: parsed.type as string,
           DINum: parsed.DINum as number,
           DONum: parsed.DONum as number
-        });
+        };
+        
+        // 只在字段存在时才添加
+        if (parsed.AINum !== undefined) {
+          device.AINum = parsed.AINum as number;
+        }
+        if (parsed.conaddr !== undefined) {
+          device.conaddr = parsed.conaddr as number;
+        }
+        if (parsed.retadd !== undefined) {
+          device.retadd = parsed.retadd as number;
+        }
+        
+        devices.push(device);
       });
     }
     
@@ -112,9 +145,12 @@ export class DataParser {
     
     const result: { channel: string; device: string; status?: number; action?: number } = {
       channel,
-      device: parsed.dev as string
+      device: parsed.devname as string || parsed.dev as string
     };
     
+    if (parsed.status !== undefined) {
+      result.status = parsed.status as number;
+    }
     if (parsed.sta !== undefined) {
       result.status = parsed.sta as number;
     }
@@ -139,8 +175,8 @@ export class DataParser {
     
     return {
       channel,
-      device: parsed.dev as string,
-      status: parsed.sta as string
+      device: parsed.devname as string || parsed.dev as string,
+      status: parsed.status as string || parsed.sta as string
     };
   }
 
@@ -165,6 +201,9 @@ export class DataParser {
         analogInputs: []
       };
       
+      let inDeviceSection = false;
+      let deviceContent = '';
+      
       // 逐行解析
       for (const line of lines) {
         const trimmedLine = line.trim();
@@ -175,8 +214,22 @@ export class DataParser {
             result.user = this.parseUser(trimmedLine);
           } else if (trimmedLine.startsWith('<net>')) {
             result.network = this.parseNetwork(trimmedLine);
-          } else if (trimmedLine.startsWith('<dev>')) {
+          } else if (trimmedLine.startsWith('<dev>') && trimmedLine.endsWith('</dev>')) {
+            // 单行设备格式
             result.devices = this.parseDevices(trimmedLine);
+          } else if (trimmedLine.startsWith('<dev>')) {
+            // 跨行设备格式开始
+            inDeviceSection = true;
+            deviceContent = trimmedLine;
+          } else if (trimmedLine.endsWith('</dev>')) {
+            // 跨行设备格式结束
+            deviceContent += trimmedLine;
+            result.devices = this.parseDevices(deviceContent);
+            inDeviceSection = false;
+            deviceContent = '';
+          } else if (inDeviceSection) {
+            // 在设备段中，继续收集内容
+            deviceContent += trimmedLine;
           } else if (trimmedLine.match(/^<DI\d+>/)) {
             const digitalInput = this.parseDigitalIO(trimmedLine);
             result.digitalInputs.push(digitalInput);
@@ -212,11 +265,17 @@ export class DataParser {
    * 将JSON格式转换回data.txt格式
    * @param jsonData JSON数据对象
    * @param outputPath 输出文件路径（可选）
+   * @param fieldMapping 字段映射配置（可选）
    * @returns 转换后的文本内容
    */
-  static async convertToText(jsonData: any, outputPath?: string): Promise<string> {
+  static async convertToText(jsonData: any, outputPath?: string, fieldMapping?: Record<string, string>): Promise<string> {
     try {
       const lines: string[] = [];
+      
+      // 字段映射函数 - 如果映射中存在则使用映射值，否则使用原字段名
+      const mapField = (field: string): string => {
+        return fieldMapping?.[field] || field;
+      };
       
       // 用户信息
       if (jsonData.user) {
@@ -226,44 +285,94 @@ export class DataParser {
       
       // 网络配置
       if (jsonData.network) {
-        const netLine = `<net>[mac=${jsonData.network.mac};ip=${jsonData.network.ip};mask=${jsonData.network.mask};gw=${jsonData.network.gateway};]</net>`;
+        const gatewayField = mapField('gateway');
+        const netLine = `<net>[mac=${jsonData.network.mac};ip=${jsonData.network.ip};mask=${jsonData.network.mask};${gatewayField}=${jsonData.network.gateway};]</net>`;
         lines.push(netLine);
       }
       
       // 设备配置
       if (jsonData.devices && jsonData.devices.length > 0) {
-        const deviceParts = jsonData.devices.map((device: any) => 
-          `[name=${device.name};type=${device.type};DINum=${device.DINum};DONum=${device.DONum};]`
-        );
+        const nameField = mapField('name');
+        const deviceParts = jsonData.devices.map((device: any) => {
+          let deviceStr = `[${nameField}=${device.name};type=${device.type};DINum=${device.DINum};DONum=${device.DONum};AINum=${device.AINum || 0};`;
+          if (device.conaddr !== undefined) {
+            deviceStr += `conaddr=${device.conaddr};`;
+          }
+          if (device.retadd !== undefined) {
+            deviceStr += `retadd=${device.retadd};`;
+          }
+          deviceStr += ']';
+          return deviceStr;
+        });
         const devLine = `<dev>${deviceParts.join('')}</dev>`;
         lines.push(devLine);
       }
       
-      // 数字输入
-      if (jsonData.digitalInputs) {
-        jsonData.digitalInputs.forEach((di: any) => {
-          const diLine = `<${di.channel}>[dev=${di.device};sta=${di.status}]</${di.channel}>`;
-          lines.push(diLine);
+      // 数字输入 (DI)
+      if (jsonData.digitalInputs && jsonData.digitalInputs.length > 0) {
+        const nameField = mapField('name');
+        const statusField = mapField('status');
+        const channelField = mapField('channel'); // 使用映射值
+        const bitField = mapField('bit');
+        
+        const diParts = jsonData.digitalInputs.map((di: any) => {
+          // 提取通道数字部分
+          const channelValue = this.extractChannelNumber(di.channel);
+          let diStr = `[${nameField}=${di.device};${statusField}=${di.status};${channelField}=${channelValue};`;
+          // 如果有 bit 信息，添加 bit 字段
+          if (di.bit !== undefined) {
+            diStr += `${bitField}=${di.bit};`;
+          }
+          diStr += ']';
+          return diStr;
         });
+        
+        const diLine = `<DI>${diParts.join('')}</DI>`;
+        lines.push(diLine);
       }
       
-      // 数字输出
-      if (jsonData.digitalOutputs) {
-        jsonData.digitalOutputs.forEach((do_: any) => {
-          const doLine = `<${do_.channel}>[dev=${do_.device};action=${do_.action}]</${do_.channel}>`;
-          lines.push(doLine);
+      // 数字输出 (DO) 
+      if (jsonData.digitalOutputs && jsonData.digitalOutputs.length > 0) {
+        const nameField = mapField('name');
+        const actionField = mapField('action');
+        const channelField = mapField('channel'); // 使用映射值
+        const bitField = mapField('bit');
+        
+        const doParts = jsonData.digitalOutputs.map((do_: any) => {
+          // 提取通道数字部分
+          const channelValue = this.extractChannelNumber(do_.channel);
+          let doStr = `[${nameField}=${do_.device};${actionField}=${do_.action};${channelField}=${channelValue};`;
+          // 如果有 bit 信息，添加 bit 字段
+          if (do_.bit !== undefined) {
+            doStr += `${bitField}=${do_.bit};`;
+          }
+          doStr += ']';
+          return doStr;
         });
+        
+        const doLine = `<DO>${doParts.join('')}</DO>`;
+        lines.push(doLine);
       }
       
-      // 模拟输入
-      if (jsonData.analogInputs) {
-        jsonData.analogInputs.forEach((ai: any) => {
-          const aiLine = `<${ai.channel}>[dev=${ai.device};sta=${ai.status}]</AI>`;
-          lines.push(aiLine);
+      // 模拟输入 (AI)
+      if (jsonData.analogInputs && jsonData.analogInputs.length > 0) {
+        const nameField = mapField('name');
+        const statusField = mapField('status');
+        const channelField = mapField('channel'); // 使用映射值
+        
+        const aiParts = jsonData.analogInputs.map((ai: any) => {
+          // 提取通道数字部分
+          const channelValue = this.extractChannelNumber(ai.channel);
+          let aiStr = `[${nameField}=${ai.device};${statusField}=${ai.status};${channelField}=${channelValue};`;
+          aiStr += ']';
+          return aiStr;
         });
+        
+        const aiLine = `<AI>${aiParts.join('')}</AI>`;
+        lines.push(aiLine);
       }
       
-      const result = lines.join('\n');
+      const result = lines.join('\n') + '!!'; // 在末尾添加两个感叹号
       
       // 如果指定了输出路径，写入文件
       if (outputPath) {
@@ -296,8 +405,9 @@ export const parseDataToJson = async (inputPath: string, outputPath?: string) =>
  * 便捷函数：将JSON转换为data.txt格式
  * @param jsonData JSON数据对象
  * @param outputPath 输出文件路径（可选）
+ * @param fieldMapping 字段映射配置（可选）
  * @returns Promise<文本内容>
  */
-export const parseJsonToData = async (jsonData: any, outputPath?: string) => {
-  return DataParser.convertToText(jsonData, outputPath);
+export const parseJsonToData = async (jsonData: any, outputPath?: string, fieldMapping?: Record<string, string>) => {
+  return DataParser.convertToText(jsonData, outputPath, fieldMapping);
 };

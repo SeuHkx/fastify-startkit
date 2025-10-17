@@ -1,0 +1,129 @@
+{{!-- auto scaffolded page template (HBS) for device-management --}}
+<div class="main-content-box--container" x-data="deviceManagement">
+  <div x-show="!isLoading">
+    <!-- 操作按钮 -->
+    <div class="buttons mb-3">
+      <button class="button is-link" @click="addDevice" :disabled="isAdding">
+        <span>添加</span>
+      </button>
+      <button class="button" @click="deleteSelected" :disabled="isAdding">
+        <span>删除</span>
+      </button>
+    </div>
+
+    <div class="table-container">
+      <table class="table is-fullwidth is-hoverable is-striped">
+        <thead>
+          <tr class="has-background-light">
+            <th style="width: 40px;">
+              <label class="checkbox">
+                <input type="checkbox" @click="toggleSelectAll" :disabled="isAdding">
+              </label>
+            </th>
+            <th>设备名称</th>
+            <th>设备类型</th>
+            <th>设备状态</th>
+            <th>设备输入点</th>
+            <th>设备输出点</th>
+            <th style="width: 180px;text-align:center;">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="(device, index) in devices" :key="`device-${device.id}-${index}`">
+            <tr>
+              <td>
+                <label class="checkbox">
+                  <input type="checkbox" x-model="device.selected" :disabled="isAdding">
+                </label>
+              </td>
+
+              <td x-text="device.name"></td>
+              <td x-text="device.type"></td>
+              <td>
+                <span class="tag" :class="{
+                  'is-success': device.status === '启用',
+                  'is-danger': device.status === '禁用'
+                }" x-text="device.status"></span>
+              </td>
+              <td x-text="device.inputPoints"></td>
+              <td x-text="device.outputPoints"></td>
+
+              <td>
+                <div class="buttons is-centered are-small">
+                  <button class="button is-small edit-point-btn" @click="editDevice(device.id)"
+                    :disabled="isAdding">
+                    <span>编辑</span>
+                  </button>
+                  <button class="button is-small delete-point-btn" @click="deleteDevice(device.id)"
+                    :disabled="isAdding">
+                    <span>删除</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </template>
+
+          <!-- 空状态 -->
+          <template x-if="devices.length === 0">
+            <tr>
+              <td colspan="8" class="has-text-centered has-text-grey">
+                <div class="py-4">
+                  <p>暂无设备数据</p>
+                  <button class="button is-primary is-small mt-2" @click="addDevice">添加第一个设备</button>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 使用通用分页组件 -->
+    {{>components/ui/pagination}}
+  </div>
+
+  <!-- 加载状态 -->
+  <div x-show="isLoading" class="has-text-centered py-6">
+    {{>components/ui/loading-spinner text="正在加载设备数据..."}}
+  </div>
+</div>
+
+<style>
+  .help.is-size-7 {
+    font-size: 0.75rem;
+  }
+
+  .buttons.are-small .button {
+    margin-bottom: 0;
+  }
+
+  /* 状态标签样式 */
+  .tag.is-success {
+    background-color: #48c774;
+    color: white;
+  }
+
+  .tag.is-danger {
+    background-color: #f14668;
+    color: white;
+  }
+
+  .tag.is-warning {
+    background-color: #ffdd57;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  /* 按钮样式 */
+
+  /* 禁用状态的按钮样式 */
+  .button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .button:disabled:hover {
+    background-color: inherit;
+    border-color: inherit;
+    color: inherit;
+  }
+</style>

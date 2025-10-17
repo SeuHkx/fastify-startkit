@@ -4,6 +4,25 @@ import pino from 'pino';
 
 const logsPlugin: FastifyPluginAsync<FastifyPluginOptions> = async (fastify) => {
     const isDev = process.env.NODE_ENV !== 'production';
+    
+    // 检查是否启用日志功能
+    // 优先级：环境变量 > 配置文件 > 默认关闭
+    const envEnableLogs = process.env.ENABLE_LOGS;
+    const configEnableLogs = fastify.config?.get('logs.enabled');
+    
+    let enableLogs = false; // 默认关闭
+    
+    if (envEnableLogs !== undefined) {
+        enableLogs = envEnableLogs === 'true';
+    } else if (configEnableLogs !== null) {
+        enableLogs = String(configEnableLogs) === 'true';
+    }
+    
+    // 如果禁用了日志，则不进行任何日志相关的操作
+    if (!enableLogs) {
+        fastify.log.info('日志功能已禁用');
+        return;
+    }
 
     const logger = pino({
         level: 'info',

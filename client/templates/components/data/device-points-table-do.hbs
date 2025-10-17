@@ -1,0 +1,126 @@
+{{!-- 设备DO点位配置表格 --}}
+<div class="tabs-box" x-show="activeTab === 'DO'">
+    <!-- 按钮控制区域 - 固定在顶部 -->
+    <div class="points-controls-in-tab">
+        <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end;">
+            <button type="button" class="is-link button" @click="importDefaultPoints()"
+                                        :disabled="isSubmitting || !form.type">
+                导入默认配置
+            </button>
+            <button type="button" class="is-link button" @click="addPoint('DO')">
+                添加
+            </button>
+            <button type="button" 
+                    class="button" 
+                    @click="deleteSelectedPoints('DO')"
+                    :disabled="selectedPointsDO.length === 0">
+                删除
+            </button>
+        </div>
+    </div>
+    
+    <!-- 表格内容区域 -->
+    <table class="points-table">
+        <thead>
+            <tr>
+                <th>
+                    <input type="checkbox" 
+                          @change="toggleAllPoints('DO', $event)" 
+                          :checked="isAllPointsSelectedDO">
+                </th>
+                <th>序号</th>
+                <th>点位类型</th>
+                <th>code</th>
+                <th>控制状态</th>
+                <th>值</th>
+                <th>位</th>
+                <th>通道</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="(point, index) in (Array.isArray(pointsDO) ? pointsDO : [])" :key="point._key ? point._key : (point.id ? point.id : (point.type + '-' + index))">
+                <tr>
+                    <td>
+                        <input type="checkbox" 
+                              :value="point.id" 
+                              x-model="selectedPointsDO">
+                    </td>
+                    <td x-text="index + 1"></td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.type" 
+                              disabled
+                              />
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.statusCode" 
+                              placeholder="请输入">
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.statusFeedback" 
+                              placeholder="请输入">
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.action" 
+                              placeholder="0"
+                              style="width: 80px;"
+                              @blur="optimizePointField('DO', index, 'action')">
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.bit" 
+                              placeholder="请输入"
+                              style="width: 80px;"
+                              @blur="optimizePointField('DO', index, 'bit')">
+                    </td>
+                    <td>
+                        <div class="select">
+                            <select x-model="point.channel">
+                                <option value="">请选择</option>
+                                <option value="DO1">DO1</option>
+                                <option value="DO2">DO2</option>
+                                <option value="DO3">DO3</option>
+                                <option value="DO4">DO4</option>
+                                <option value="DO5">DO5</option>
+                                <option value="DO6">DO6</option>
+                                <option value="DO7">DO7</option>
+                                <option value="DO8">DO8</option>
+                                <option value="DO9">DO9</option>
+                                <option value="DO10">DO10</option>
+                                <option value="DO11">DO11</option>
+                                <option value="DO12">DO12</option>
+                                <option value="DO13">DO13</option>
+                                <option value="DO14">DO14</option>
+                                <option value="DO15">DO15</option>
+                                <option value="DO16">DO16</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <button type="button" 
+                                class="delete-point-btn" 
+                                @click="deletePoint('DO', index)">
+                            删除
+                        </button>
+                    </td>
+                </tr>
+            </template>
+            <template x-if="pointsDO.length === 0">
+                <tr>
+                    <td colspan="8" class="has-text-centered has-text-grey">
+                        <span>暂无DO类型的点位配置，请点击'添加'按钮添加点位</span>
+                    </td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</div>

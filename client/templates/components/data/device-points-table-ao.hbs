@@ -1,0 +1,115 @@
+{{!-- 设备AO点位配置表格 --}}
+<div class="tabs-box" x-show="activeTab === 'AO'">
+    <div style="display: flex; gap: 0.5rem; align-items: center;justify-content: flex-end;margin-bottom: 10px;">
+        <button type="button" class="is-link button" @click="addPoint('AO')">
+            添加
+        </button>
+        <button type="button" 
+                class="button" 
+                @click="deleteSelectedPoints('AO')"
+                :disabled="selectedPointsAO.length === 0">
+            删除
+        </button>
+    </div>
+    <table class="points-table">
+        <thead>
+            <tr>
+                <th>
+                    <input type="checkbox" 
+                          @change="toggleAllPoints('AO', $event)" 
+                          :checked="isAllPointsSelectedAO">
+                </th>
+                <th>序号</th>
+                <th>点位类型</th>
+                <th>code</th>
+                <th>状态反馈</th>
+                <th>值</th>
+                <th>通道</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="(point, index) in (Array.isArray(pointsAO) ? pointsAO : [])" :key="point._key ? point._key : (point.id ? point.id : (point.type + '-' + index))">
+                <tr>
+                    <td>
+                        <input type="checkbox" 
+                              :value="point.id" 
+                              x-model="selectedPointsAO"
+                              :disabled="point.isFromTemplate">
+                    </td>
+                    <td x-text="index + 1"></td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.type" 
+                              disabled
+                              />
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.code" 
+                              placeholder="请输入"
+                              :disabled="point.isFromTemplate" 
+                              :readonly="point.isFromTemplate">
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.statusFeedback" 
+                              placeholder="请输入"
+                              :disabled="point.isFromTemplate" 
+                              :readonly="point.isFromTemplate">
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="number" 
+                              x-model.number="point.value" 
+                              placeholder="0"
+                              style="width: 80px;"
+                              :disabled="point.isFromTemplate" 
+                              :readonly="point.isFromTemplate">
+                    </td>
+                    <td>
+                        <div class="select">
+                            <select x-model="point.channel">
+                                <option value="">请选择</option>
+                                <option value="AO1">AO1</option>
+                                <option value="AO2">AO2</option>
+                                <option value="AO3">AO3</option>
+                                <option value="AO4">AO4</option>
+                                <option value="AO5">AO5</option>
+                                <option value="AO6">AO6</option>
+                                <option value="AO7">AO7</option>
+                                <option value="AO8">AO8</option>
+                                <option value="AO9">AO9</option>
+                                <option value="AO10">AO10</option>
+                                <option value="AO11">AO11</option>
+                                <option value="AO12">AO12</option>
+                                <option value="AO13">AO13</option>
+                                <option value="AO14">AO14</option>
+                                <option value="AO15">AO15</option>
+                                <option value="AO16">AO16</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <button type="button" 
+                                class="delete-point-btn" 
+                                @click="deletePoint('AO', index)"
+                                :disabled="point.isFromTemplate">
+                            删除
+                        </button>
+                    </td>
+                </tr>
+            </template>
+            <template x-if="pointsAO.length === 0">
+                <tr>
+                    <td colspan="8" class="has-text-centered has-text-grey">
+                        <span>暂无AO类型的点位配置，请点击'添加'按钮添加点位</span>
+                    </td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</div>

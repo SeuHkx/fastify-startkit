@@ -46,3 +46,14 @@ pm2 delete all
 - 服务器需预先安装 Node.js（建议 18+）。
 - 环境变量主要来自 `app/.env.production`，可按需修改端口、日志路径等。
 - 日志文件路径由 `app/.env.production` 与 `app/bin/ecosystem.config.js` 决定。
+
+## 前端混淆与视图压缩注意事项
+
+- 视图压缩：构建阶段已对 `.ejs` 关闭 `minifyJS/minifyCSS` 且保留属性引号，避免破坏 `x-*` 指令表达式。
+- 风险守卫：构建时会扫描 `x-(init|data|on|bind|model)` 属性，若检测到内联大型 JSON 或 `JSON.stringify` 会告警；在 CI 可设置 `STRICT_X_ATTR=1` 让构建失败，避免线上回归。
+- 数据注入：不要在 `x-*` 属性中直接内联 JSON。推荐使用 `<script type="application/json">` 承载数据并在运行时解析到 `window` 变量，例如 `x-init="initWithData(window.__SIDEBAR_MENU)"`。
+- 前端混淆：仅对 `public/dist` 应用代码做混淆，跳过第三方、*.min.js 与运行时文件。保守配置已关闭高风险项（controlFlowFlattening、rc4 等）。
+- 环境开关：
+	- `DISABLE_CLIENT_OBFUSCATION=1` 完全禁用前端混淆（排障用）
+	- `REDUCE_CLIENT_OBFUSCATION=1` 降级为更安全的轻量混淆
+	- `OBFUSCATE_SOURCEMAP=1` 生成单独 SourceMap（建议仅测试/预发启用）

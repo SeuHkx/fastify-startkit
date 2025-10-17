@@ -59,11 +59,16 @@ const serviceNetwork = async (fastify: FastifyInstance, params: {
         }
 
         // 验证MAC地址格式
-        const macRegex = /^([0-9A-Fa-f]{2}[.-]){5}([0-9A-Fa-f]{2})$/;
-        if (!macRegex.test(params.macAddress)) {
+        const macRegexColon = /^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$/;
+        const macRegexHyphen = /^([0-9A-Fa-f]{2}-){5}[0-9A-Fa-f]{2}$/;
+        const macRegexDot = /^([0-9A-Fa-f]{2}\.){5}[0-9A-Fa-f]{2}$/;
+        
+        if (!macRegexColon.test(params.macAddress) && 
+            !macRegexHyphen.test(params.macAddress) && 
+            !macRegexDot.test(params.macAddress)) {
             return {
                 statusCode: 400,
-                message: 'MAC地址格式不正确，应为 XX.XX.XX.XX.XX.XX 或 XX-XX-XX-XX-XX-XX 或 XX:XX:XX:XX:XX:XX 格式',
+                message: 'MAC地址格式不正确，支持格式：XX:XX:XX:XX:XX:XX 或 XX-XX-XX-XX-XX-XX 或 XX.XX.XX.XX.XX.XX',
                 success: false,
             };
         }

@@ -1,0 +1,15 @@
+{
+  "user": {
+    "username": "admin",
+    "password": "admin"
+  },
+  "network": {
+    "mac": "00:07:ce:aa:bc:cc",
+    "ip": "192.168.1.56",
+    "mask": "255.255.255.0"
+  },
+  "devices": [],
+  "digitalInputs": [],
+  "digitalOutputs": [],
+  "analogInputs": []
+}

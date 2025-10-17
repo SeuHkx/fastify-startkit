@@ -1,0 +1,123 @@
+{
+  "devices": [
+    {
+      "id": "1559edf7-becf-4367-9a1d-bda862462aa7",
+      "name": "车道指示器",
+      "code": "CZ",
+      "status": true,
+      "points": [
+        {
+          "id": 1757641053563.7454,
+          "type": "DI",
+          "code": "",
+          "statusFeedback": "正面箭头反馈",
+          "value": 0,
+          "status": "0",
+          "statusCode": "CZ_A_lv",
+          "channel": "DI3",
+          "bit": "1"
+        },
+        {
+          "id": 1757641924255.8635,
+          "type": "DI",
+          "code": "",
+          "statusFeedback": "正面红叉反馈",
+          "value": 1,
+          "statusCode": "CZ_A_hong",
+          "status": "1",
+          "channel": "请选择",
+          "bit": "2"
+        },
+        {
+          "id": 1757641946277.8796,
+          "type": "DI",
+          "code": "",
+          "statusFeedback": "反面箭头反馈",
+          "value": 2,
+          "statusCode": "CZ_B_lv",
+          "status": "3",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "id": 1757641954200.21,
+          "type": "DI",
+          "code": "",
+          "statusFeedback": "反面红叉反馈",
+          "value": 3,
+          "statusCode": "CZ_B_hong",
+          "status": "4",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "id": 1757641962387.5173,
+          "type": "DI",
+          "code": "",
+          "statusFeedback": "正面转向反馈",
+          "value": 4,
+          "statusCode": "CZ_A_zhuanxiang",
+          "status": "2",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "id": 1757641970352.5095,
+          "type": "DI",
+          "code": "",
+          "statusFeedback": "反面转向反馈",
+          "value": 5,
+          "statusCode": "CZ_B_zhuanxiang",
+          "status": "5",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "id": 1757642061866.4846,
+          "type": "DO",
+          "code": "",
+          "statusFeedback": "正向通行",
+          "value": 0,
+          "statusCode": "CZ_action_zhengxiang",
+          "action": "1",
+          "channel": "请选择",
+          "bit": "1"
+        },
+        {
+          "id": 1757642069206.5867,
+          "type": "DO",
+          "code": "",
+          "statusFeedback": "反向通行",
+          "value": 1,
+          "statusCode": "CZ_action_fanxiang",
+          "action": "2",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "id": 1757642076331.4766,
+          "type": "DO",
+          "code": "",
+          "statusFeedback": "双向禁行",
+          "value": 2,
+          "statusCode": "CZ_action_shuangxiang",
+          "action": "3",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "id": 1757642087139.2888,
+          "type": "DO",
+          "code": "",
+          "statusFeedback": "车指正面转向",
+          "value": 3,
+          "statusCode": "CZ_atcion_Azhuanxiang",
+          "action": "4",
+          "channel": "请选择",
+          "bit": 0
+        }
+      ]
+    }
+  ],
+  "lastUpdated": "2025-09-16T03:08:03.183Z"
+}

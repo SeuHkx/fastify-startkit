@@ -3,27 +3,29 @@ app:
   version: 1.0.0
   script: server.js
 
+logs:
+  enabled: false
+  level: "info"
+  storage: false
+
 sidebar:
   title: "硬件管控终端"
   menu:
     - id: "network-check"
-      name: "网络检查"
+      name: "网络配置"
       url: "#network"
       active: true
     - id: "device-type"
-      name: "设备类型配置"
+      name: "设备类型模版"
       url: "#device-type"
       active: false
     - id: "device-management"
       name: "设备管理"
       url: "#device-management"
-    - id: "input-config"
-      name: "输入点配置"
-      url: "#input-config"
       active: false
-    - id: "output-config"
-      name: "输出点配置"
-      url: "#output-config"
+    - id: "config-management"
+      name: "配置文件管理"
+      url: "#config-management"
       active: false
     - id: "change-password"
       name: "修改密码"

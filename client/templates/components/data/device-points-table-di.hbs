@@ -1,0 +1,126 @@
+{{!-- 设备DI点位配置表格 --}}
+<div class="tabs-box" x-show="activeTab === 'DI'">
+    <!-- 按钮控制区域 - 固定在顶部 -->
+    <div class="points-controls-in-tab">
+        <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end;">
+            <button type="button" class="is-link button"  @click="importDefaultPoints()"
+                                        :disabled="isSubmitting || !form.type">
+                导入默认配置
+            </button>
+            <button type="button" class="is-link button" @click="addPoint('DI')">
+                添加
+            </button>
+            <button type="button" 
+                    class="button" 
+                    @click="deleteSelectedPoints('DI')"
+                    :disabled="selectedPointsDI.length === 0">
+                删除
+            </button>
+        </div>
+    </div>
+    
+    <!-- 表格内容区域 -->
+    <table class="points-table">
+        <thead>
+            <tr>
+                <th>
+                    <input type="checkbox" 
+                          @change="toggleAllPoints('DI', $event)" 
+                          :checked="isAllPointsSelectedDI">
+                </th>
+                <th>序号</th>
+                <th>点位类型</th>
+                <th>code</th>
+                <th>状态反馈</th>
+                <th>值</th>
+                <th>位</th>
+                <th>通道</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="(point, index) in (Array.isArray(pointsDI) ? pointsDI : [])" :key="point._key ? point._key : (point.id ? point.id : (point.type + '-' + index))">
+                <tr>
+                    <td>
+                        <input type="checkbox" 
+                              :value="point.id" 
+                              x-model="selectedPointsDI">
+                    </td>
+                    <td x-text="index + 1"></td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.type" 
+                              disabled
+                              />
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.statusCode" 
+                              placeholder="请输入">
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.statusFeedback" 
+                              placeholder="请输入">
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.status" 
+                              placeholder="0"
+                              style="width: 80px;"
+                              @blur="optimizePointField('DI', index, 'status')">
+                    </td>
+                    <td>
+                        <input class="input" 
+                              type="text" 
+                              x-model="point.bit" 
+                              placeholder="请输入"
+                              style="width: 80px;"
+                              @blur="optimizePointField('DI', index, 'bit')">
+                    </td>
+                    <td>
+                        <div class="select">
+                            <select x-model="point.channel">
+                                <option value="">请选择</option>
+                                <option value="DI1">DI1</option>
+                                <option value="DI2">DI2</option>
+                                <option value="DI3">DI3</option>
+                                <option value="DI4">DI4</option>
+                                <option value="DI5">DI5</option>
+                                <option value="DI6">DI6</option>
+                                <option value="DI7">DI7</option>
+                                <option value="DI8">DI8</option>
+                                <option value="DI9">DI9</option>
+                                <option value="DI10">DI10</option>
+                                <option value="DI11">DI11</option>
+                                <option value="DI12">DI12</option>
+                                <option value="DI13">DI13</option>
+                                <option value="DI14">DI14</option>
+                                <option value="DI15">DI15</option>
+                                <option value="DI16">DI16</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <button type="button" 
+                                class="delete-point-btn" 
+                                @click="deletePoint('DI', index)">
+                            删除
+                        </button>
+                    </td>
+                </tr>
+            </template>
+            <template x-if="pointsDI.length === 0">
+                <tr>
+                    <td colspan="9" class="has-text-centered has-text-grey">
+                        <span>暂无DI类型的点位配置，请点击'添加'按钮添加点位</span>
+                    </td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</div>

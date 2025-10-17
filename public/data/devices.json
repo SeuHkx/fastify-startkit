@@ -1,0 +1,433 @@
+{
+  "devices": [
+    {
+      "id": "c69a684c-64d5-4a70-8d8c-31bbc25ee0b9",
+      "name": "ZM",
+      "deviceTypeId": "1559edf7-becf-4367-9a1d-bda862462aa7",
+      "conaddr": "90089",
+      "retadd": "90009",
+      "customPoints": [],
+      "channelOverrides": [],
+      "skipTemplatePoints": true,
+      "points": [
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_A_lv",
+          "statusFeedback": "正面箭头反馈",
+          "value": 0,
+          "status": "q1",
+          "channel": "DI2",
+          "bit": "12"
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_action_zhengxiang",
+          "statusFeedback": "正向通行",
+          "value": 0,
+          "action": "1",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_action_fanxiang",
+          "statusFeedback": "反向通行",
+          "value": 1,
+          "action": "2",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_action_shuangxiang",
+          "statusFeedback": "双向禁行",
+          "value": 2,
+          "action": "3",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_atcion_Azhuanxiang",
+          "statusFeedback": "车指正面转向",
+          "value": 3,
+          "action": "4",
+          "channel": "请选择",
+          "bit": 0
+        }
+      ],
+      "createdAt": "2025-09-15T15:50:25.700Z",
+      "updatedAt": "2025-09-16T02:28:17.578Z",
+      "useIndependentPoints": true,
+      "independentPoints": [
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_A_lv",
+          "statusFeedback": "正面箭头反馈",
+          "value": 0,
+          "status": "q1",
+          "channel": "DI2",
+          "bit": "12"
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_action_zhengxiang",
+          "statusFeedback": "正向通行",
+          "value": 0,
+          "action": "1",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_action_fanxiang",
+          "statusFeedback": "反向通行",
+          "value": 1,
+          "action": "2",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_action_shuangxiang",
+          "statusFeedback": "双向禁行",
+          "value": 2,
+          "action": "3",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_atcion_Azhuanxiang",
+          "statusFeedback": "车指正面转向",
+          "value": 3,
+          "action": "4",
+          "channel": "请选择",
+          "bit": 0
+        }
+      ]
+    },
+    {
+      "id": "4d227a8e-bc1d-47ad-bc6d-f7ea9a896404",
+      "name": "qqqq",
+      "deviceTypeId": "1559edf7-becf-4367-9a1d-bda862462aa7",
+      "conaddr": "qqq",
+      "retadd": "qqqq",
+      "independentPoints": [
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "q",
+          "statusFeedback": "q",
+          "value": 0,
+          "status": "q",
+          "action": "",
+          "channel": "DI4",
+          "bit": "0qq"
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "q",
+          "statusFeedback": "w",
+          "value": 1,
+          "status": "qqq",
+          "action": "",
+          "channel": "DI2",
+          "bit": "0q"
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_A_lv",
+          "statusFeedback": "正面箭头反馈",
+          "value": 0,
+          "status": "111",
+          "channel": "DI3",
+          "bit": "12"
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_A_hong",
+          "statusFeedback": "正面红叉反馈",
+          "value": 1,
+          "status": "1",
+          "channel": "请选择",
+          "bit": "2"
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_B_lv",
+          "statusFeedback": "反面箭头反馈",
+          "value": 2,
+          "status": "3",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_B_hong",
+          "statusFeedback": "反面红叉反馈",
+          "value": 3,
+          "status": "4",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_A_zhuanxiang",
+          "statusFeedback": "正面转向反馈",
+          "value": 4,
+          "status": "2",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_B_zhuanxiang",
+          "statusFeedback": "反面转向反馈",
+          "value": 5,
+          "status": "5",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_action_zhengxiang",
+          "statusFeedback": "正向通行",
+          "value": 0,
+          "action": "1",
+          "channel": "请选择",
+          "bit": "1"
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_action_fanxiang",
+          "statusFeedback": "反向通行",
+          "value": 1,
+          "action": "2",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_action_shuangxiang",
+          "statusFeedback": "双向禁行",
+          "value": 2,
+          "action": "3",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_atcion_Azhuanxiang",
+          "statusFeedback": "车指正面转向",
+          "value": 3,
+          "action": "4",
+          "channel": "请选择",
+          "bit": 0
+        }
+      ],
+      "createdAt": "2025-09-16T03:06:02.097Z",
+      "updatedAt": "2025-09-16T03:06:19.032Z"
+    },
+    {
+      "id": "d9f99818-4c5c-4bb2-be77-3f67ec84cecd",
+      "name": "b3",
+      "deviceTypeId": "1559edf7-becf-4367-9a1d-bda862462aa7",
+      "conaddr": "b",
+      "retadd": "b",
+      "independentPoints": [
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "b",
+          "statusFeedback": "b",
+          "value": 0,
+          "status": "b",
+          "action": "",
+          "channel": "DI1",
+          "bit": "b"
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "b",
+          "statusFeedback": "b",
+          "value": 1,
+          "status": "b",
+          "action": "",
+          "channel": "DI2",
+          "bit": "b"
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_A_lv",
+          "statusFeedback": "正面箭头反馈",
+          "value": 0,
+          "status": "b",
+          "channel": "DI3",
+          "bit": "b"
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_A_hong",
+          "statusFeedback": "正面红叉反馈",
+          "value": 1,
+          "status": "b33",
+          "channel": "DI4",
+          "bit": "b33"
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_B_lv",
+          "statusFeedback": "反面箭头反馈",
+          "value": 2,
+          "status": "3",
+          "channel": "DI2",
+          "bit": 0
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_B_hong",
+          "statusFeedback": "反面红叉反馈",
+          "value": 3,
+          "status": "4",
+          "channel": "DI2",
+          "bit": 0
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_A_zhuanxiang",
+          "statusFeedback": "正面转向反馈",
+          "value": 4,
+          "status": "2",
+          "channel": "DI2",
+          "bit": 0
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "CZ_B_zhuanxiang",
+          "statusFeedback": "反面转向反馈",
+          "value": 5,
+          "status": "5",
+          "channel": "DI2",
+          "bit": 0
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "",
+          "statusFeedback": "",
+          "value": 8,
+          "status": "",
+          "action": "",
+          "channel": "DI3",
+          "bit": 0
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "",
+          "statusFeedback": "",
+          "value": 9,
+          "status": "",
+          "action": "",
+          "channel": "DI3",
+          "bit": 0
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "",
+          "statusFeedback": "",
+          "value": 10,
+          "status": "",
+          "action": "",
+          "channel": "DI4",
+          "bit": 0
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "",
+          "statusFeedback": "",
+          "value": 11,
+          "status": "",
+          "action": "",
+          "channel": "DI2",
+          "bit": 0
+        },
+        {
+          "type": "DI",
+          "code": "",
+          "statusCode": "",
+          "statusFeedback": "",
+          "value": 12,
+          "status": "",
+          "action": "",
+          "channel": "请选择",
+          "bit": 0
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_action_zhengxiang",
+          "statusFeedback": "正向通行",
+          "value": 0,
+          "action": "1b",
+          "channel": "请选择",
+          "bit": "1b"
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_action_fanxiang",
+          "statusFeedback": "反向通行",
+          "value": 1,
+          "action": "2",
+          "channel": "请选择",
+          "bit": "0b"
+        },
+        {
+          "type": "DO",
+          "code": "",
+          "statusCode": "CZ_action_shuangxiang",
+          "statusFeedback": "双向禁行",
+          "value": 2,
+          "action": "3",
+          "channel": "请选择",
+          "bit": "0b"
+        }
+      ],
+      "createdAt": "2025-09-16T03:07:14.929Z",
+      "updatedAt": "2025-09-16T03:39:49.391Z"
+    }
+  ],
+  "lastUpdated": "2025-09-16T03:39:49.392Z"
+}

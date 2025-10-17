@@ -15,6 +15,7 @@ import * as esbuild from 'esbuild';
 const fsp = fs.promises;
 const ROOT = process.cwd();
 const SRC_DIR = path.resolve(ROOT, 'client/views');
+const TEMPLATES_DIR = path.resolve(ROOT, 'client/templates');
 const SERVER_VIEWS_DIR = path.resolve(ROOT, 'src/views');
 const OUT_TPL_DIR = path.resolve(ROOT, 'public/dist/src/template');
 const OUT_PAGE_DIR = path.resolve(ROOT, 'public/dist/src/page');
@@ -63,6 +64,29 @@ async function pathExists(p: string) { try { await fsp.access(p); return true; }
 function toRelName(absPath: string) {
 	const rel = path.relative(SRC_DIR, absPath).replace(/\\/g, '/');
 	return rel.replace(/\.hbs$/, '');
+}
+
+function toPartialName(absPath: string) {
+	const rel = path.relative(TEMPLATES_DIR, absPath).replace(/\\/g, '/');
+	return rel.replace(/\.hbs$/, '');
+}
+
+async function compilePartial(absPath: string) {
+	try {
+		const name = toPartialName(absPath);
+		const src = await fsp.readFile(absPath, 'utf8');
+		const precompiled = Handlebars.precompile(src);
+		// 保持多层级目录结构
+		const partialDirPath = path.dirname(name);
+		const outDir = path.join(OUT_TPL_DIR, '_partials', partialDirPath);
+		await ensureDir(outDir);
+		const fileName = path.basename(name);
+		const outFile = path.join(outDir, `${fileName}.js`);
+		const wrapper = `/* auto-generated partial from ${path.relative(ROOT, absPath).replace(/\\/g,'/')} */\n// ESM partial module\nconst H = typeof window !== 'undefined' ? window.Handlebars : undefined;\nif (H && H.registerPartial) {\n  const tpl = H.template(${precompiled});\n  H.registerPartial('${name}', tpl);\n}\nexport default function registerPartial() {\n  const H = typeof window !== 'undefined' ? window.Handlebars : undefined;\n  if (H && H.registerPartial) {\n    const tpl = H.template(${precompiled});\n    H.registerPartial('${name}', tpl);\n  }\n}`;
+		const minified = await terserMinify(wrapper, { module: true, compress: true, mangle: true });
+		await fsp.writeFile(outFile, minified.code || wrapper, 'utf8');
+		console.log('[hbs] Compiled partial:', `${name} -> _partials/${name}.js`);
+	} catch (err) { console.error('[hbs] Partial compile error:', absPath, err); }
 }
 
 async function compileHbs(absPath: string) {
@@ -165,12 +189,24 @@ async function buildRuntimeBundle() {
 	try {
 		await ensureDir(OUT_LIB_DIR);
 		const pages = await collectBuiltPages();
+
+		// Collect partials
+		const partialFiles = await glob('**/*.js', { cwd: path.join(OUT_TPL_DIR, '_partials'), absolute: true }).catch(() => []);
+
 		const tmpDir = path.join(ROOT, '.tmp');
 		await ensureDir(tmpDir);
 		const tmpEntry = path.join(tmpDir, 'runtime-entry.ts');
 
 		const importLines: string[] = [];
 		const registryLines: string[] = [];
+
+		// Import partials
+		partialFiles.forEach((partialFile, idx) => {
+			const partialVar = `partial_${idx}`;
+			importLines.push(`import ${partialVar} from '${toRelImport(path.dirname(tmpEntry), partialFile)}';`);
+		});
+
+		// Import pages
 		pages.forEach((p, idx) => {
 			const tplVar = `tpl_${idx}`;
 			const scriptVar = `page_${idx}`;
@@ -183,7 +219,10 @@ async function buildRuntimeBundle() {
 			}
 		});
 
-			const src = `/* auto-generated runtime bundle */\n${importLines.join('\n')}\n\nconst REGISTRY: any = {\n${registryLines.join(',\n')}\n};\n\nexport function assetVersion(){ return (window as any).__assetVersion__ || Date.now(); }\n\nexport async function importWithVersion(src: string, _ver?: any){ return import(src); }\n\n// runtime config (root resolver etc.)\nconst CONFIG: any = (window as any).__PageRuntimeConfig || {};\nexport function configure(cfg: any){ Object.assign(CONFIG, cfg || {}); (window as any).__PageRuntimeConfig = CONFIG; }\nexport function getConfig(){ return CONFIG; }\n\n// hot api: get, set and rerender
+		// Initialize partials
+		const partialInitLines = partialFiles.map((_, idx) => `partial_${idx}();`);
+
+		const src = `/* auto-generated runtime bundle */\n${importLines.join('\n')}\n\n// Initialize partials\n${partialInitLines.join('\n')}\n\nconst REGISTRY: any = {\n${registryLines.join(',\n')}\n};\n\nexport function assetVersion(){ return (window as any).__assetVersion__ || Date.now(); }\n\nexport async function importWithVersion(src: string, _ver?: any){ return import(src); }\n\n// runtime config (root resolver etc.)\nconst CONFIG: any = (window as any).__PageRuntimeConfig || {};\nexport function configure(cfg: any){ Object.assign(CONFIG, cfg || {}); (window as any).__PageRuntimeConfig = CONFIG; }\nexport function getConfig(){ return CONFIG; }\n\n// hot api: get, set and rerender
 		export function __hotGet(name: string){ return REGISTRY[name]; }
 		export function __hotSet(name: string, entry: any){ REGISTRY[name] = entry; }
 
@@ -230,6 +269,16 @@ async function buildRuntimeBundle() {
 }
 
 async function buildPagesOnce() {
+	// Build partials first
+	try {
+		const partialFiles = await glob('**/*.hbs', { cwd: TEMPLATES_DIR, absolute: true });
+		await Promise.all(partialFiles.map(compilePartial));
+		console.log(`[hbs] Built ${partialFiles.length} partials`);
+	} catch (err) {
+		console.warn('[hbs] No partials directory or partials build failed:', err);
+	}
+
+	// Build page templates
 	const hbsFiles = await glob('**/*.hbs', { cwd: SRC_DIR, absolute: true });
 	await Promise.all(hbsFiles.map(compileHbs));
 	const pageIndexHbs = await glob('**/index.hbs', { cwd: SRC_DIR, absolute: true });
@@ -267,6 +316,7 @@ function scheduleRuntimeBuild(){ if (runtimeBuildTimer) clearTimeout(runtimeBuil
 async function main() {
 	const watch = process.argv.includes('--watch');
 	console.log(`[hbs] Source: ${SRC_DIR}`);
+	console.log(`[hbs] Templates: ${TEMPLATES_DIR}`);
 	console.log(`[hbs] Output(templates): ${OUT_TPL_DIR}`);
 	console.log(`[hbs] Output(pages): ${OUT_PAGE_DIR}`);
 	console.log(`[hbs] Output(runtime): ${OUT_LIB_DIR}`);
@@ -280,13 +330,36 @@ async function main() {
 		watcher.on('add', onFsEvent);
 		watcher.on('change', onFsEvent);
 		watcher.on('unlink', onFsUnlink);
+
+		// Watch templates directory for partials
+		const templatesWatcher = chokidar.watch(TEMPLATES_DIR, { ignored: /(^|[\/\\])\../, ignoreInitial: true });
+		const onTemplatesEvent = (absPath: string) => {
+			if (absPath.endsWith('.hbs')) {
+				compilePartial(absPath);
+				scheduleRuntimeBuild();
+			}
+		};
+		templatesWatcher.on('add', onTemplatesEvent);
+		templatesWatcher.on('change', onTemplatesEvent);
+		templatesWatcher.on('unlink', (absPath: string) => {
+			if (absPath.endsWith('.hbs')) {
+				const name = toPartialName(absPath);
+				// 保持多层级目录结构
+				const partialDirPath = path.dirname(name);
+				const fileName = path.basename(name);
+				const outFile = path.join(OUT_TPL_DIR, '_partials', partialDirPath, `${fileName}.js`);
+				fsp.unlink(outFile).catch(() => {});
+				scheduleRuntimeBuild();
+			}
+		});
+
 		// also watch server EJS views for auto refresh
 		const watcherViews = chokidar.watch(SERVER_VIEWS_DIR, { ignored: /(^|[\/\\])\../, ignoreInitial: true });
 		const onViewsChange = (p: string) => { console.log('[hbs] views changed:', path.relative(ROOT, p)); HOT?.broadcast('reload', { t: Date.now(), kind: 'views' }); };
 		watcherViews.on('add', onViewsChange);
 		watcherViews.on('change', onViewsChange);
 		watcherViews.on('unlink', onViewsChange);
-		console.log('[hbs] Watching for changes... (client/views + src/views)');
+		console.log('[hbs] Watching for changes... (client/views + client/templates + src/views)');
 	}
 }
 

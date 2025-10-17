@@ -10,65 +10,267 @@
     <link rel="stylesheet" href="/public/css/font/iconfont.css"/>
     <script src="/public/js/alpinejs@3.14.8/cdn.min.js" defer></script>
     <style>
-        html, body{
-            background: #215BDB;
-            overflow-y: auto;
-            height: 100%;
-            margin: 0;
-            padding: 0;
+        html, body { 
+            background: #ecf0f1; 
+            overflow-y: auto; 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        :root{
-            --bulma-size-normal:14px;
-            --bulma-body-font-size:14px;
-            --bulma-control-size: 14px;
+        
+        :root { 
+            --bulma-size-normal: 14px; 
+            --bulma-body-font-size: 14px; 
+            --bulma-control-size: 14px; 
         }
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        
+        /* 主容器 - 限制整体宽度 */
+        .login-container {
+            max-width: 1200px;
+            margin: 0 auto;
             min-height: 100vh;
-        }
-        .login-box{
-            margin-top: -200px;
-            width: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
         }
-        .login-box .field{
-            margin-bottom: 20px;
+        
+        /* 主布局 - 模仿主页面的 main-layout */
+        .main-layout {
+            display: flex;
+            width: 100%;
+            min-height: 600px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        /* 左侧图片区域 - 模仿侧边栏样式 */
+         .login-sidebar {
+             width: 60%;
+             background-color: #EAF1FF;
+             display: flex;
+             flex-direction: column;
+             position: relative;
+         }
+        
+        .login-sidebar-title {
+                font-size: 20px;
+                font-weight: bold;
+                text-align: left;
+                padding: 20px 20px;
+                background-color: #EAF1FF;
+                color: #333;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                min-height: 80px;
+            }
+          
+          .login-sidebar-subtitle {
+              font-size: 14px;
+              color: #333;
+          }
+        
+        .login-sidebar-content {
+             flex: 1;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             padding: 40px;
+             background: url('/public/images/logoBg.png') no-repeat center;
+             background-size: 50%;
+         }
+        
+        /* 右侧登录区域 - 模仿主内容区域 */
+        .login-main {
+            flex: 1;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        
+
+        
+        .login-main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        
+        .login-version {
+            margin-top: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .login-box { 
+            width: 100%;
+            max-width: 400px; 
+            padding: 40px;
+            background: white;
+            /* border-radius: 4px; */
+            /* box-shadow: 0 2px 8px rgba(0,0,0,0.1); */
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .login-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #495057;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .login-box .field { 
+            margin-bottom: 20px; 
+        }
+        
+        .login-box .input {
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            padding: 12px 16px 12px 45px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: #fff;
+        }
+        
+        .login-box .input:focus {
+            border-color: #0092fe;
+            box-shadow: 0 0 0 2px rgba(0, 146, 254, 0.1);
+            outline: none;
+        }
+        
+        .login-box .input.is-danger {
+            border-color: #dc3545;
+        }
+        
+        .login-box .input.is-danger:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+        }
+        
+        .login-box .button {
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            background: #0092fe;
+            border-color: #0092fe;
+            color: white;
+            transition: all 0.2s ease;
+            height: auto;
+        }
+        
+        .login-box .button:hover {
+            background: #007acc;
+            border-color: #007acc;
+        }
+        
+        .login-box .button.is-loading {
+            color: transparent;
+        }
+        
+        .login-box .icon {
+            color: #6c757d;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 10px;
+            }
+            
+            .main-layout {
+                flex-direction: column;
+                min-height: auto;
+            }
+            
+            .login-sidebar {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .login-sidebar-content {
+                padding: 20px;
+            }
+            
+            .login-main-content {
+                padding: 20px;
+            }
+            
+            .login-box {
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="login-box box">
-        <form @submit.prevent="submitFormLogin" method="post" x-ref="form" action="/login">
-            <div class="login-title block">
-                <span class="is-size-5">欢迎登录系统</span>
-            </div>
-            <div class="field">
-                <p class="control has-icons-left has-icons-right">
-                    <input class="input" @focus="state.name = true" :class="state.name ? '':'is-danger'" name="name" type="text" placeholder="输入账号" x-model="user.name"/>
-                    <span class="icon is-small is-left">
-                        <i class="iconfont icon-zhanghao"></i>
-                    </span>
-                </p>
-            </div>
-            <div class="field">
-                <p class="control has-icons-left">
-                    <input class="input" @focus="state.password = true" :class="state.password ? '':'is-danger'" name="password" type="password" placeholder="输入密码" x-model="user.password"/>
-                    <span class="icon is-small is-left">
-                        <i class="iconfont icon-mima" style="font-size: 20px"></i>
-                    </span>
-                </p>
-            </div>
-            <div class="field">
-                <div class="buttons">
-                    <button :class="state.button ? 'is-loading':''" class="button is-link is-fullwidth">登录</button>
+    <div class="login-container">
+        <div class="main-layout">
+            <!-- 左侧图片区域 -->
+             <div class="login-sidebar">
+                 <div class="login-sidebar-title">
+                     隧道机电控制终端
+                     <div class="login-sidebar-subtitle">Tunnel electromechanical control terminal</div>
+                 </div>
+                 <div class="login-sidebar-content">
+                     <!-- 背景图片通过CSS设置 -->
+                 </div>
+             </div>
+            
+            <!-- 右侧登录区域 -->
+              <div class="login-main">
+                  <div class="login-main-content">
+                <div class="login-box">
+                    <form @submit.prevent="submitFormLogin" method="post" x-ref="form" action="/login">
+                        <div class="login-title">
+                            欢迎登录系统
+                        </div>
+                        <div class="field">
+                            <p class="control has-icons-left">
+                                <input class="input" @focus="state.name = true" :class="state.name ? '':'is-danger'" name="name" type="text" placeholder="输入账号" x-model="user.name"/>
+                                <span class="icon is-small is-left">
+                                    <i class="iconfont icon-zhanghao"></i>
+                                </span>
+                            </p>
+                        </div>
+                        <div class="field">
+                            <p class="control has-icons-left">
+                                <input class="input" @focus="state.password = true" :class="state.password ? '':'is-danger'" name="password" type="password" placeholder="输入密码" x-model="user.password"/>
+                                <span class="icon is-small is-left">
+                                    <i class="iconfont icon-mima" style="font-size: 20px"></i>
+                                </span>
+                            </p>
+                        </div>
+                        <div class="field">
+                            <div class="buttons">
+                                <button :class="state.button ? 'is-loading':''" class="button is-link is-fullwidth">登录</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="login-version">
+                    版本号：v1.0.0.20251011.0
                 </div>
             </div>
-        </form>
+        </div>
+        </div>
     </div>
+    
     <script src="/public/js/toastifyjs@1.12.0/toastify-js.js"></script>
     <script src="/public/js/axios@1.7.9/axios.min.js"></script>
     <script src="/public/dist/src/login.js"></script>
+    <!-- 已移除 Alpine 调试脚本，如需再次排查可回滚历史 -->
 </body>
 </html>
