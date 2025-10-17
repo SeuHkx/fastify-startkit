@@ -3,4 +3,5 @@ node_modules
 .idea
 dist
 app
-.env
+.tmp
+.githooks
