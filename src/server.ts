@@ -12,14 +12,18 @@ const app:FastifyInstance = Fastify({
     await app.register(import('@fastify/formbody'))
     await app.register(import('@fastify/multipart'))
     await app.register(import('@fastify/cors'), {
-        origin: '*',
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
+        origin: true, // 允许所有来源，也可以设置为具体的域名数组
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+        exposedHeaders: ['Content-Disposition'], // 允许前端访问 Content-Disposition 头（用于文件下载）
+        credentials: true, // 允许携带 Cookie
+        maxAge: 86400, // 预检请求的缓存时间（24小时）
     });
     await app.register(import('@/plugins/errorHandler-plugin'));
     await app.register(import('@/plugins/env-plugin'));
     await app.register(import('@/plugins/config-plugin'));
     await app.register(import('@/plugins/logs-plugin'));
+    await app.register(import('@/plugins/prisma-plugin'));
     await app.register(import('@fastify/cookie'));
     await app.register(import('@/plugins/axios-plugin'),{
         baseURL:app.env.PROXY_BASE_URL,
@@ -37,7 +41,7 @@ const app:FastifyInstance = Fastify({
     });
     await app.register(import('@/plugins/auth-plugin'),{
         secret: app.env.JWT_SECRET,
-        noAuthRoutes:['/login','/public']
+        noAuthRoutes:['/login','/public','/qrcode/generate','/qrcode/saved','/qrcode/delete','/qrcode/download-by-external-ids']
     });
     const port = Number(app.env?.APP_PORT) || 3000;
     const start = async () => {

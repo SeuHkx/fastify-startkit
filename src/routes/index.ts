@@ -6,6 +6,7 @@ import devicesRoute from "@/routes/route-devices";
 import deviceInstancesRoute from "@/routes/route-device-instances";
 import dataConversionRoute from "@/routes/route-data-conversion";
 import dataTxtParserRoute from "@/routes/route-data-txt-parser";
+import qrcodeRoute from "@/routes/route-qrcode";
 import { controllerGetEnhancedDeviceList } from "@/controllers/controller-device-management";
 import loginVRoute from "@/routes/views/route-v-login";
 import mainVRoute from "@/routes/views/route-v-main";
@@ -19,6 +20,7 @@ const routes: FastifyPluginAsync = async (app) => {
     app.register(deviceInstancesRoute);
     app.register(dataConversionRoute);
     app.register(dataTxtParserRoute);
+    app.register(qrcodeRoute);
     app.register(loginVRoute);
     app.register(mainVRoute);
     

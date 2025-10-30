@@ -1,0 +1,562 @@
+<section class="main-content-box--container" x-data="qrCode">
+  <div class="qrcode-container">
+    <!-- 左侧：配置表单 -->
+    <div class="qrcode-form">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 class="title is-5">微信小程序二维码生成</h2>
+        <button class="button is-small" @click="toggleBatchMode" x-text="batchMode ? '切换到单个模式' : '切换到批量模式'"></button>
+      </div>
+      
+      <!-- 错误提示 -->
+      <div x-show="error" class="notification is-danger" style="margin-bottom: 1rem;">
+        <button class="delete" @click="clearError"></button>
+        <span x-text="error"></span>
+      </div>
+      
+      <!-- 单个生成模式 -->
+      <div x-show="!batchMode">
+        <div class="box">
+          <h3 class="title is-6">二维码参数</h3>
+          <div class="field">
+            <label class="label">Scene (场景值) <span class="has-text-danger">*</span></label>
+            <div class="control">
+              <input class="input" type="text" x-model="form.scene" placeholder="最多32个字符，如：001" maxlength="32">
+            </div>
+            <p class="help">用于区分不同场景的参数，最大32个字符</p>
+          </div>
+          
+          <div class="field">
+            <label class="label">Page (页面路径)</label>
+            <div class="control">
+              <input class="input" type="text" x-model="form.page" placeholder="如：pages/index/index">
+            </div>
+            <p class="help">小程序页面路径，不填则默认跳转首页</p>
+          </div>
+          
+          <div class="field">
+            <label class="label">Width (宽度)</label>
+            <div class="control">
+              <input class="input" type="number" x-model="form.width" min="280" max="1280" placeholder="430">
+            </div>
+            <p class="help">二维码宽度，默认430，最小280，最大1280</p>
+          </div>
+        </div>
+        
+        <!-- 生成按钮 -->
+        <div class="field">
+          <div class="control">
+            <button 
+              class="button is-primary is-fullwidth" 
+              @click="generateQRCode"
+              :class="{ 'is-loading': loading }"
+              :disabled="loading">
+              <span class="icon">
+                <i class="fa fa-qrcode"></i>
+              </span>
+              <span>生成二维码</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 批量生成模式 -->
+      <div x-show="batchMode">
+        <div class="box">
+          <h3 class="title is-6">批量二维码参数</h3>
+          
+          <div class="field">
+            <label class="label">Page (公共页面路径)</label>
+            <div class="control">
+              <input class="input" type="text" x-model="form.page" placeholder="如：pages/index/index">
+            </div>
+            <p class="help">所有二维码的公共页面路径（可选）</p>
+          </div>
+          
+          <div class="field">
+            <label class="label">Width (公共宽度)</label>
+            <div class="control">
+              <input class="input" type="number" x-model="form.width" min="280" max="1280" placeholder="430">
+            </div>
+            <p class="help">所有二维码的宽度，默认430</p>
+          </div>
+        </div>
+        
+        <!-- 批量模式选择 -->
+        <div class="box">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 class="title is-6" style="margin-bottom: 0;">生成方式</h3>
+            <button class="button is-small is-info" @click="toggleRegionMode" x-text="useRegionMode ? '切换到自由输入' : '切换到区域序列'"></button>
+          </div>
+          
+          <!-- 区域序列模式 -->
+          <div x-show="useRegionMode">
+            <div class="field">
+              <label class="label">选择区域 <span class="has-text-danger">*</span></label>
+              <div class="control">
+                <div class="select is-fullwidth">
+                  <select x-model="regionCode">
+                    <template x-for="region in regions" :key="region.code">
+                      <option :value="region.code" x-text="`${region.name} (${region.code})`"></option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+              <p class="help">选择要生成二维码的区域</p>
+            </div>
+            
+            <div class="field">
+              <label class="label">生成数量 <span class="has-text-danger">*</span></label>
+              <div class="control">
+                <input class="input" type="number" x-model.number="batchCount" min="1" max="500" placeholder="100">
+              </div>
+              <p class="help">批量生成的二维码数量（最多500个）</p>
+            </div>
+            
+            <div class="field">
+              <label class="label">起始序号</label>
+              <div class="control">
+                <input class="input" type="number" x-model.number="startNumber" min="1" placeholder="1">
+              </div>
+              <p class="help">序号起始值，默认从1开始</p>
+            </div>
+            
+            <!-- 预览示例 -->
+            <div class="notification is-info is-light" style="margin-top: 1rem;">
+              <p class="has-text-weight-bold">生成示例：</p>
+              <p x-show="regionCode && batchCount > 0">
+                <span x-text="`${regionCode}${String(startNumber).padStart(7, '0')}`"></span>
+                <span x-show="batchCount > 1"> ~ </span>
+                <span x-show="batchCount > 1" x-text="`${regionCode}${String(startNumber + batchCount - 1).padStart(7, '0')}`"></span>
+              </p>
+              <p class="help" style="margin-top: 0.5rem;">
+                格式：区域代码(6位) + 序号(7位)，共13位字符
+              </p>
+            </div>
+          </div>
+          
+          <!-- 自由输入模式 -->
+          <div x-show="!useRegionMode">
+            <div class="field">
+              <label class="label">Scene 列表 <span class="has-text-danger">*</span></label>
+              <div class="control">
+                <textarea 
+                  class="textarea" 
+                  x-model="batchText" 
+                  placeholder="每行一个场景值，例如：&#10;001&#10;002&#10;003&#10;&#10;或指定自定义文件名：&#10;001|user-001.png&#10;002|user-002.png"
+                  rows="10"></textarea>
+              </div>
+              <p class="help">每行一个场景值，支持格式：scene 或 scene|filename.png</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 批量生成按钮 -->
+        <div class="field">
+          <div class="control">
+            <button 
+              class="button is-primary is-fullwidth" 
+              @click="batchGenerateQRCode"
+              :class="{ 'is-loading': batchLoading }"
+              :disabled="batchLoading">
+              <span class="icon">
+                <i class="fa fa-download"></i>
+              </span>
+              <span>批量生成并下载 ZIP</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 右侧：二维码预览（仅在单个模式显示） -->
+    <div class="qrcode-preview" x-show="!batchMode">
+      <h2 class="title is-5">二维码预览</h2>
+      <div class="qrcode-display">
+        <template x-if="!qrCodeUrl && !loading">
+          <div class="qrcode-placeholder">
+            <span class="icon is-large has-text-grey-light">
+              <i class="fa fa-qrcode fa-5x"></i>
+            </span>
+            <p class="has-text-grey">请配置参数并生成二维码</p>
+          </div>
+        </template>
+        
+        <template x-if="loading">
+          <div class="qrcode-placeholder">
+            <div class="loader"></div>
+            <p class="has-text-grey">正在生成二维码...</p>
+          </div>
+        </template>
+        
+        <template x-if="qrCodeUrl && !loading">
+          <div class="qrcode-image">
+            <img :src="qrCodeUrl" alt="Generated QR Code" />
+            <div class="qrcode-actions">
+              <button class="button is-success" @click="downloadQRCode">
+                <span>下载二维码</span>
+              </button>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+    
+    <!-- 右侧：批量模式说明 -->
+    <div class="qrcode-preview" x-show="batchMode">
+      <h2 class="title is-5">批量生成说明</h2>
+      <div class="batch-info-box">
+        <div class="content">
+          <h4>两种生成方式</h4>
+          
+          <div class="notification is-primary is-light">
+            <p class="has-text-weight-bold">🎯 区域序列模式（推荐）</p>
+            <p>适用于需要按区域编码批量生成连续序号的场景</p>
+            <ul style="margin-top: 0.5rem;">
+              <li>选择区域（如：成都高新区 - 510102）</li>
+              <li>设置生成数量（如：100）</li>
+              <li>自动生成序列：5101020000001 ~ 5101020000100</li>
+            </ul>
+          </div>
+          
+          <div class="notification is-info is-light" style="margin-top: 1rem;">
+            <p class="has-text-weight-bold">📝 自由输入模式</p>
+            <p>适用于自定义场景值的批量生成</p>
+            <ul style="margin-top: 0.5rem;">
+              <li>每行输入一个场景值</li>
+              <li>支持格式：<code>scene</code> 或 <code>scene|filename.png</code></li>
+            </ul>
+          </div>
+          
+          <h4>区域序列规则</h4>
+          <ul>
+            <li><strong>格式：</strong>区域代码(6位) + 序号(7位) = 13位字符</li>
+            <li><strong>示例：</strong>510102 + 0000001 = 5101020000001</li>
+            <li><strong>范围：</strong>可生成 1 到 9,999,999 的序号</li>
+            <li><strong>限制：</strong>单次最多生成 500 个二维码</li>
+          </ul>
+          
+          <h4>自由输入示例</h4>
+          <pre class="example-text">001
+002
+003
+user-123|custom-name.png</pre>
+          
+          <h4>下载内容</h4>
+          <p>ZIP 文件中包含：</p>
+          <ul>
+            <li>所有成功生成的二维码图片（PNG 格式）</li>
+            <li><code>summary.json</code> - 生成结果汇总文件</li>
+          </ul>
+          
+          <h4>注意事项</h4>
+          <ul>
+            <li>批量生成会依次请求微信接口，数量较多时需要耐心等待</li>
+            <li>微信有接口调用频率限制，建议单次不超过 500 个</li>
+            <li>生成失败的二维码会在 summary.json 中标注</li>
+            <li>区域序列模式下，文件名自动为场景值.png</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .qrcode-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 10;
+    margin: 0 auto;
+  }
+  
+  @media (max-width: 1024px) {
+    .qrcode-container {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .qrcode-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .qrcode-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .qrcode-display {
+    background: #f5f5f5;
+    border: 2px dashed #dbdbdb;
+    border-radius: 6px;
+    padding: 2rem;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .qrcode-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .qrcode-image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .qrcode-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  
+  .qrcode-actions {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  /* Loading spinner */
+  .loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3273dc;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .box {
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 0.5em 1em -0.125em rgba(10,10,10,0.1);
+    padding: 1.25rem;
+  }
+  
+  .field:not(:last-child) {
+    margin-bottom: 0.75rem;
+  }
+  
+  .label {
+    color: #363636;
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  
+  .help {
+    display: block;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    color: #7a7a7a;
+  }
+  
+  .notification {
+    background-color: whitesmoke;
+    border-radius: 4px;
+    padding: 1.25rem 2.5rem 1.25rem 1.5rem;
+    position: relative;
+  }
+  
+  .notification.is-danger {
+    background-color: #f14668;
+    color: #fff;
+  }
+  
+  .notification .delete {
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+  }
+  
+  .delete {
+    background-color: rgba(10,10,10,0.2);
+    border: none;
+    border-radius: 290486px;
+    cursor: pointer;
+    display: inline-block;
+    height: 20px;
+    width: 20px;
+    position: relative;
+  }
+  
+  .delete::before,
+  .delete::after {
+    background-color: white;
+    content: "";
+    display: block;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%) rotate(45deg);
+    transform-origin: center center;
+  }
+  
+  .delete::before {
+    height: 2px;
+    width: 50%;
+  }
+  
+  .delete::after {
+    height: 50%;
+    width: 2px;
+  }
+  
+  /* 批量模式样式 */
+  .batch-info-box {
+    background: white;
+    border-radius: 6px;
+    padding: 1.5rem;
+    box-shadow: 0 0.5em 1em -0.125em rgba(10,10,10,0.1);
+  }
+  
+  .batch-info-box .content h4 {
+    color: #363636;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    margin-top: 1rem;
+  }
+  
+  .batch-info-box .content h4:first-child {
+    margin-top: 0;
+  }
+  
+  .batch-info-box .content ul,
+  .batch-info-box .content ol {
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .batch-info-box .content li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .batch-info-box .content code {
+    background-color: #f5f5f5;
+    color: #da1039;
+    font-size: 0.875em;
+    font-weight: normal;
+    padding: 0.25em 0.5em;
+    border-radius: 3px;
+  }
+  
+  .example-text {
+    background-color: #f5f5f5;
+    border: 1px solid #dbdbdb;
+    border-radius: 4px;
+    color: #4a4a4a;
+    display: block;
+    font-size: 0.875em;
+    overflow-x: auto;
+    padding: 1rem;
+    white-space: pre;
+    margin-top: 0.5rem;
+  }
+  
+  .textarea {
+    display: block;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    padding: 0.625em;
+    border: 1px solid #dbdbdb;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    resize: vertical;
+  }
+  
+  .textarea:focus {
+    border-color: #3273dc;
+    outline: none;
+    box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
+  }
+  
+  /* Select 下拉框样式 */
+  .select {
+    display: inline-block;
+    max-width: 100%;
+    position: relative;
+    vertical-align: top;
+  }
+  
+  .select.is-fullwidth {
+    width: 100%;
+  }
+  
+  .select.is-fullwidth select {
+    width: 100%;
+  }
+  
+  .select select {
+    cursor: pointer;
+    display: block;
+    font-size: 1rem;
+    max-width: 100%;
+    outline: none;
+    border: 1px solid #dbdbdb;
+    border-radius: 4px;
+    background-color: white;
+    color: #363636;
+  }
+  
+  .select select:hover {
+    border-color: #b5b5b5;
+  }
+  
+  .select select:focus {
+    border-color: #3273dc;
+    box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
+  }
+  
+  .select:not(.is-multiple):not(.is-loading)::after {
+    border: 3px solid #3273dc;
+    border-radius: 2px;
+    border-right: 0;
+    border-top: 0;
+    content: " ";
+    display: block;
+    height: 0.625em;
+    margin-top: -0.4375em;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: rotate(-45deg);
+    transform-origin: center;
+    width: 0.625em;
+    right: 1.125em;
+    z-index: 4;
+  }
+  
+  /* 信息框样式 */
+  .notification.is-light {
+    background-color: whitesmoke;
+  }
+  
+  .notification.is-primary.is-light {
+    background-color: #ebfffc;
+    color: #00947e;
+  }
+  
+  .notification.is-info.is-light {
+    background-color: #eff5fb;
+    color: #296fa8;
+  }
+</style>

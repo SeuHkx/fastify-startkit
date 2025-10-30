@@ -14,7 +14,7 @@ sidebar:
     - id: "network-check"
       name: "网络配置"
       url: "#network"
-      active: true
+      active: false
     - id: "device-type"
       name: "设备类型模版"
       url: "#device-type"
@@ -31,3 +31,18 @@ sidebar:
       name: "修改密码"
       url: "#change-password"
       active: false
+    - id: "qr-code"
+      name: "二维码"
+      url: "#qr-code"
+      active: true
+
+# 微信小程序配置
+wechat:
+  # 微信小程序凭证（请在生产环境使用环境变量覆盖）
+  credentials:
+    appId: "wx1453bad1afb13d51"  # 微信小程序 AppID，建议通过环境变量配置
+    appSecret: "376c38d66620286f30aea22923576070"  # 微信小程序 AppSecret，建议通过环境变量配置
+  api:
+    baseUrl: "https://api.weixin.qq.com"
+    tokenUrl: "/cgi-bin/token"
+    qrcodeUrl: "/wxa/getwxacodeunlimit"

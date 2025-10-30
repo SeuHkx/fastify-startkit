@@ -3,18 +3,22 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-model application {
-  ID              String    @id @db.VarChar(50)
-  ApplicationName String?   @db.VarChar(200)
-  SessionItems    Bytes?
-  Expires         DateTime? @db.DateTime(0)
-  GlobalSessionID String    @db.VarChar(50)
-  Created         DateTime? @db.DateTime(0)
-  LastAccessed    DateTime? @db.DateTime(0)
+model QrcodeRecord {
+  id         Int      @id @default(autoincrement())
+  externalId String   @map("external_id")
+  scene      String
+  page       String?
+  width      Int      @default(430)
+  qrcodeData Bytes?   @map("qrcode_data")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  @@index([GlobalSessionID], map: "FK_PK_GlobalSession_Application")
+  @@index([externalId])
+  @@index([scene])
+  @@map("qrcode_records")
 }
+
